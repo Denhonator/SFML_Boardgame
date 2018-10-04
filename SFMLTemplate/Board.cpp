@@ -42,7 +42,6 @@ sf::RenderTexture * Board::GetTexture(bool refresh)
 				t.setTexture(*Resources::GetTexture(s));
 				t.setPosition(i*tileSize, j*tileSize);
 				t.setScale(sf::Vector2f(tileSize/t.getLocalBounds().width, tileSize/t.getLocalBounds().height));
-				printf("Width: %f\n", t.getGlobalBounds().width);
 				rTex.draw(t);
 			}
 		}

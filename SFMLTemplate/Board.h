@@ -10,6 +10,7 @@ public:
 	~Board();
 	void InsertTile(unsigned short x, unsigned short y, Tile tile);
 	void SetTileSize(float size);
+	float GetTileSize() { return tileSize; };
 	bool refresh;
 	sf::RenderTexture* GetTexture(bool refresh = false);
 private:

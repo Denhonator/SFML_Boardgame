@@ -1,13 +1,13 @@
 #include "Main.h"
 #include <thread>
 
-void FixedLoop() {
+void FixedLoop(Main* game) {
 	sf::Clock clock;
 
-	while (Main::GetWindow()->isOpen()) {
+	while (game->GetWindow()->isOpen()) {
 		if (clock.getElapsedTime().asMilliseconds() > 16) {
 			clock.restart();
-			Main::FixedUpdate();
+			game->FixedUpdate();
 		}
 		else {
 			sf::sleep(sf::milliseconds(1));
@@ -19,13 +19,13 @@ int main()
 {
 	Resources res;
 	Main game;
-	std::thread loop(FixedLoop);
+	std::thread loop(FixedLoop, &game);
 
-	while (Main::GetWindow()->isOpen())
+	while (game.GetWindow()->isOpen())
 	{
-		Main::Events();
-		Main::Update();
-		Main::Draw();
+		game.Events();
+		game.Update();
+		game.Draw();
 	}
 	loop.join();
 	return 0;

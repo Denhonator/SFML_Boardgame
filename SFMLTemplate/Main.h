@@ -10,16 +10,19 @@ class Main
 public:
 	Main();
 	~Main();
-	static void Events();
-	static void Update();
-	static void FixedUpdate();
-	static void Draw();
-	static sf::RenderWindow* GetWindow();
+	 void Events();
+	 void Update();
+	 void FixedUpdate();
+	 void Draw();
+	 sf::RenderWindow* GetWindow();
 private:
-	static sf::RenderWindow window;
-	static std::vector<sf::Sprite>* sprites;
-	static Scene mainScene;
-	static Time timeObject;
-	static sf::View view;
+	 sf::RenderWindow window;
+	 std::vector<sf::Sprite>* tiles;
+	 std::vector<sf::Sprite>* sprites;
+	 Scene mainScene;
+	 Time timeObject;
+	 sf::View view;
+	 sf::Vector2i mousePos;
+	 sf::Vector2i mouseTile;
 };
 

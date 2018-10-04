@@ -16,7 +16,7 @@ Time::~Time()
 void Time::TakeTime()
 {
 	deltaTime = (clock.getElapsedTime() - time).asMicroseconds()*0.000001f;
-	printf("Time::Mult: %f\n", Time::Mult());
+	//printf("Time::Mult: %f\n", Time::Mult());
 	time = clock.getElapsedTime();
 }
 

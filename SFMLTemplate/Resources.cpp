@@ -11,6 +11,8 @@ Resources::Resources()
 		texture['g'] = buffer;
 	if (buffer.loadFromFile("0.png"))
 		texture['0'] = buffer;
+	if (buffer.loadFromFile("outline.png"))
+		texture['o'] = buffer;
 	ready = true;
 }
 
