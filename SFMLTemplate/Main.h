@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Resources.h"
 #include "Scene.h"
 #include "Time.h"
 #include <stdio.h>
@@ -19,5 +20,6 @@ private:
 	static std::vector<sf::Sprite>* sprites;
 	static Scene mainScene;
 	static Time timeObject;
+	static sf::View view;
 };
 
