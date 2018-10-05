@@ -10,7 +10,8 @@ public:
 	~Board();
 	void InsertTile(unsigned short x, unsigned short y, Tile tile);
 	void SetTileSize(float size);
-	float GetTileSize() { return tileSize; };
+	float GetTileSize();
+	Tile GetTile(unsigned short x, unsigned short y);
 	sf::Vector2i boardSize;
 	bool refresh;
 	sf::RenderTexture* GetTexture(bool refresh = false);

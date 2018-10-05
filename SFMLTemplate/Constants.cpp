@@ -1,5 +1,7 @@
 #include "Constants.h"
 
+float Constants::tileSize;
+
 Constants::Constants()
 {
 }

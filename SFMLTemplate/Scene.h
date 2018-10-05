@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include "Time.h"
 #include "Board.h"
+#include "Unit.h"
+#include <random>
 
 class Scene
 {
@@ -11,12 +13,19 @@ public:
 	~Scene();
 	std::vector<sf::Sprite>* Update();
 	void AddTile(sf::Sprite* spr);
+	void AddUnit(Unit* unit);
 	void SetTileSize(int size) { board.SetTileSize(size); };
 	void MouseHover(sf::Vector2i pos);
+	void Click();
 	Board* GetBoard() { return &board; };
-private:
+	std::vector<sf::Sprite> ui;
 	std::vector<sf::Sprite> tiles;
+	std::vector<Unit> units;
+	std::vector<unsigned int> drawTiles;
+	std::vector<unsigned int> drawUnits;
+private:
 	Board board;
 	sf::Vector2i mouseTile;
+	int currentPlayer;
 };
 

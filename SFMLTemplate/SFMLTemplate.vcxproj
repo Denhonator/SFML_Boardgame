@@ -150,6 +150,7 @@
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="Time.cpp" />
+    <ClCompile Include="Unit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="Time.h" />
+    <ClInclude Include="Unit.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

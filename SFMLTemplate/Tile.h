@@ -1,10 +1,12 @@
 #pragma once
+#include <string>
 class Tile
 {
 public:
 	Tile();
-	Tile(char tex);
+	Tile(std::string tex);
 	~Tile();
-	char sprite;
+	std::string sprite;
+	int unit;
 };
 

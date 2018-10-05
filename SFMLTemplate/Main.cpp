@@ -50,15 +50,17 @@ void Main::Events()
 				mainScene.MouseHover(sf::Vector2i(window.mapPixelToCoords(mousePos)));
 			}
 		}
+
+		if (event.type == sf::Event::MouseButtonPressed) {
+			if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+				mainScene.Click();
+		}
 	}
 }
 
 void Main::Update()
 {
-	tiles = mainScene.Update();
-	for (unsigned short i = 0; i < tiles->size(); i++) {
-		sprites->push_back(tiles->at(i));
-	}
+	mainScene.Update();
 }
 
 void Main::FixedUpdate()
@@ -68,11 +70,17 @@ void Main::FixedUpdate()
 void Main::Draw()
 {
 	window.clear();
-	for (unsigned int i = 0; i < sprites->size(); i++) {
-		window.draw(sprites->at(i));
+	for (unsigned int i = 0; i < mainScene.drawTiles.size(); i++) {
+		window.draw(mainScene.tiles.at(mainScene.drawTiles.at(i)));
 	}
-	sprites->clear();
+	for (unsigned int i = 0; i < mainScene.drawUnits.size(); i++) {
+		window.draw(mainScene.units.at(mainScene.drawUnits.at(i)).sprite);
+	}
+	for (unsigned int i = 0; i < mainScene.ui.size(); i++) {
+		window.draw(mainScene.ui.at(i));
+	}
 	window.display();
+	sprites->clear();
 }
 
 sf::RenderWindow * Main::GetWindow()
