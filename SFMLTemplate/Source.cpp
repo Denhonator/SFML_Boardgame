@@ -23,9 +23,13 @@ int main()
 
 	while (game.GetWindow()->isOpen())
 	{
+		Time::TakeTime();
 		game.Events();
+		//printf("Events: %f\n", Time::GetTime());
 		game.Update();
+		//printf("Update: %f\n", Time::GetTime());
 		game.Draw();
+		//printf("Draw: %f\n", Time::GetTime());
 	}
 	loop.join();
 	return 0;

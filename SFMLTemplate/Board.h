@@ -11,11 +11,11 @@ public:
 	void InsertTile(unsigned short x, unsigned short y, Tile tile);
 	void SetTileSize(float size);
 	float GetTileSize() { return tileSize; };
+	sf::Vector2i boardSize;
 	bool refresh;
 	sf::RenderTexture* GetTexture(bool refresh = false);
 private:
 	float tileSize;
 	Tile tiles[Constants::boardSize][Constants::boardSize];
-	unsigned short boardSize = Constants::boardSize;
 	static sf::RenderTexture rTex;
 };

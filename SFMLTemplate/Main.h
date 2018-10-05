@@ -23,6 +23,5 @@ private:
 	 Time timeObject;
 	 sf::View view;
 	 sf::Vector2i mousePos;
-	 sf::Vector2i mouseTile;
 };
 

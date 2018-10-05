@@ -4,11 +4,12 @@ sf::RenderTexture Board::rTex;
 
 Board::Board()
 {
+	boardSize = sf::Vector2i(30,30);
 	tileSize = 30;
 	refresh = true;
 	rTex.create(2048, 2048);
-	for (unsigned short i = 0; i < boardSize; i++) {
-		for (unsigned short j = 0; j < boardSize; j++) {
+	for (unsigned short i = 0; i < boardSize.x; i++) {
+		for (unsigned short j = 0; j < boardSize.y; j++) {
 			tiles[i][j] = Tile();
 		}
 	}
@@ -34,9 +35,9 @@ sf::RenderTexture * Board::GetTexture(bool refresh)
 {
 	if (refresh) {
 		rTex.clear();
-		rTex.setView(sf::View(sf::FloatRect(0, 0, boardSize*tileSize, boardSize*tileSize)));
-		for (unsigned short i = 0; i < boardSize; i++) {
-			for (unsigned short j = 0; j < boardSize; j++) {
+		rTex.setView(sf::View(sf::FloatRect(0, 0, boardSize.x*tileSize, boardSize.y*tileSize)));
+		for (unsigned short i = 0; i < boardSize.x; i++) {
+			for (unsigned short j = 0; j < boardSize.y; j++) {
 				char s = tiles[i][j].sprite;
 				sf::Sprite t;
 				t.setTexture(*Resources::GetTexture(s));

@@ -8,11 +8,10 @@ public:
 	Time();
 	~Time();
 	static void TakeTime();
+	static float GetTime();
 	static float Mult();
-
 private:
 	static sf::Clock clock;
-	static sf::Time time;
 	static float deltaTime;
 };
 

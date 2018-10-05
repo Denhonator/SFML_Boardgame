@@ -12,9 +12,11 @@ public:
 	std::vector<sf::Sprite>* Update();
 	void AddTile(sf::Sprite* spr);
 	void SetTileSize(int size) { board.SetTileSize(size); };
-	Board GetBoard() { return board; };
+	void MouseHover(sf::Vector2i pos);
+	Board* GetBoard() { return &board; };
 private:
 	std::vector<sf::Sprite> tiles;
 	Board board;
+	sf::Vector2i mouseTile;
 };
 

@@ -4,6 +4,6 @@ class Constants
 public:
 	Constants();
 	~Constants();
-	static const unsigned short boardSize = 30;
+	static const unsigned short boardSize = 40;
 };
 
