@@ -21,6 +21,7 @@ public:
 	std::vector<sf::Sprite> ui;
 	std::vector<sf::Sprite> tiles;
 	std::vector<Unit> units;
+	std::vector<sf::Text> texts;
 	std::vector<unsigned int> drawTiles;
 	std::vector<unsigned int> drawUnits;
 private:
@@ -28,4 +29,3 @@ private:
 	sf::Vector2i mouseTile;
 	int currentPlayer;
 };
-

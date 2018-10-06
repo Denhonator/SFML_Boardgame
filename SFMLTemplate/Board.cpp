@@ -23,6 +23,7 @@ Board::~Board()
 void Board::InsertTile(unsigned short x, unsigned short y, Tile tile)
 {
 	tiles[x][y] = tile;
+	Tile::tileRef[x] = &tiles[x][0];
 }
 
 void Board::SetTileSize(float size)

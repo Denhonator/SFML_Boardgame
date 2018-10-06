@@ -6,9 +6,11 @@ Main::Main()
 	sprites = new std::vector<sf::Sprite>;
 	mousePos = sf::Mouse::getPosition();
 	view = window.getView();
+	fixedView = window.getView();
 
 	window.setFramerateLimit(55);
 	mainScene.SetTileSize(window.getSize().y / mainScene.GetBoard()->boardSize.y);
+	Console::init();
 }
 
 Main::~Main()
@@ -30,8 +32,26 @@ void Main::Events()
 
 		if (event.type == sf::Event::Resized) {
 			view.setSize(sf::Vector2f(window.getSize()));
+			fixedView = sf::View(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y));
 			window.setView(view);
 			mainScene.SetTileSize(window.getSize().y / mainScene.GetBoard()->boardSize.y);
+		}
+
+		if (event.type == sf::Event::KeyPressed) {
+			if (event.key.code == sf::Keyboard::F1) {
+				Console::enable = !Console::enable;
+			}
+			if (event.key.code == sf::Keyboard::Return) {
+				if (Console::enable) {
+					Console::Command(&mainScene);
+				}
+			}
+		}
+
+		if (event.type == sf::Event::TextEntered) {
+			if (Console::enable) {
+				Console::Write(event.text.unicode);
+			}
 		}
 
 		if (event.type == sf::Event::MouseWheelScrolled) {
@@ -79,8 +99,18 @@ void Main::Draw()
 	for (unsigned int i = 0; i < mainScene.ui.size(); i++) {
 		window.draw(mainScene.ui.at(i));
 	}
+	window.setView(fixedView);
+	for (unsigned int i = 0; i < mainScene.texts.size(); i++) {
+		window.draw(mainScene.texts.at(i));
+	}
+	if (Console::enable) {
+		Console::bg.setSize(sf::Vector2f(fixedView.getSize().x, fixedView.getSize().y/4));
+		window.draw(Console::bg);
+		window.draw(Console::input);
+	}
 	window.display();
 	sprites->clear();
+	window.setView(view);
 }
 
 sf::RenderWindow * Main::GetWindow()

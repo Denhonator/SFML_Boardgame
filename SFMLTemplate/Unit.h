@@ -10,9 +10,10 @@ class Unit
 public:
 	Unit(std::string name, int player=0);
 	~Unit();
-	void MoveTo(sf::Vector2i pos, Tile* tile);
+	void MoveTo(sf::Vector2i pos);
 	int player;
 	int id;
+	sf::Vector2i tile;
 	sf::Sprite sprite;
 private:
 	std::string name;

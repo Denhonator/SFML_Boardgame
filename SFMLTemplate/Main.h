@@ -1,9 +1,9 @@
 #pragma once
-#include <SFML/Graphics.hpp>
 #include "Resources.h"
 #include "Scene.h"
 #include "Time.h"
 #include <stdio.h>
+#include "Console.h"
 
 class Main
 {
@@ -22,6 +22,7 @@ private:
 	 Scene mainScene;
 	 Time timeObject;
 	 sf::View view;
+	 sf::View fixedView;
 	 sf::Vector2i mousePos;
 };
 

@@ -3,7 +3,6 @@
 Scene::Scene()
 {
 	srand(time(NULL));
-	drawTiles = { 0 };
 	for (int i = 0; i < board.boardSize.x; i++) {
 		for (int j = 0; j < board.boardSize.y; j++) {
 			if(rand()%101>30)
@@ -11,9 +10,10 @@ Scene::Scene()
 		}
 	}
 	const sf::Texture& bg = board.GetTexture(true)->getTexture();
-	tiles.push_back(sf::Sprite(bg));
+	AddTile(&sf::Sprite(bg));
 	ui.push_back(sf::Sprite(*Resources::GetTexture("ui/outline")));
 	ui.at(0).setScale(Constants::tileSize / ui.at(0).getLocalBounds().width, Constants::tileSize / ui.at(0).getLocalBounds().height);
+	texts.push_back(sf::Text("", *Resources::GetFont("default.ttf")));
 	mouseTile = sf::Vector2i(0, 0);
 	AddUnit(&Unit("swordguy", 1));
 	currentPlayer = 1;
@@ -41,7 +41,7 @@ void Scene::AddTile(sf::Sprite * spr)
 void Scene::AddUnit(Unit * unit)
 {
 	units.push_back(*unit);
-	drawUnits.push_back(tiles.size() - 1);
+	drawUnits.push_back(units.size() - 1);
 }
 
 sf::Vector2i LimitToBoard(sf::Vector2f tile, Board* board) {
@@ -53,6 +53,7 @@ void Scene::MouseHover(sf::Vector2i pos)
 	mouseTile = LimitToBoard(sf::Vector2f(board.boardSize.x*pos.x/tiles.at(0).getLocalBounds().width, board.boardSize.y*pos.y / tiles.at(0).getLocalBounds().height), &board);
 	ui.at(0).setColor(sf::Color(255, 255, 255, mouseTile.x < 0 ? 0 : 255));
 	ui.at(0).setPosition(mouseTile.x*tiles.at(0).getLocalBounds().width / board.boardSize.x, mouseTile.y*tiles.at(0).getLocalBounds().height / board.boardSize.y);
+	texts.at(0).setString(board.GetTile(mouseTile.x, mouseTile.y).Print());
 	//printf("%d, %d\n", mouseTile.x, mouseTile.y);
 }
 
@@ -60,7 +61,7 @@ void Scene::Click()
 {
 	for (int i = 0; i < units.size(); i++) {
 		if (units.at(i).player == currentPlayer) {
-			units.at(i).MoveTo(mouseTile, &board.GetTile(mouseTile.x, mouseTile.y));
+			units.at(i).MoveTo(mouseTile);
 		}
 	}
 }

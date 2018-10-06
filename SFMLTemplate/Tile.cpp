@@ -1,5 +1,7 @@
 #include "Tile.h"
 
+Tile* Tile::tileRef[Constants::boardSize];
+
 Tile::Tile()
 {
 	sprite = "0";
@@ -14,4 +16,9 @@ Tile::Tile(std::string tex)
 
 Tile::~Tile()
 {
+}
+
+std::string Tile::Print()
+{
+	return sprite+"\nUnit: "+std::to_string(unit);
 }
