@@ -53,7 +53,7 @@ sf::RenderTexture * Board::GetTexture(bool refresh)
 		for (unsigned short i = 0; i < boardSize.x; i++) {
 			for (unsigned short j = 0; j < boardSize.y; j++) {
 				sf::Sprite t;
-				t.setTexture(*Resources::GetTexture("tiles/"+tiles[i][j].sprite));
+				t.setTexture(*Resources::GetTexture("tiles/"+tiles[i][j].sprite+"/"+ tiles[i][j].sprite));
 				t.setPosition(i*tileSize, j*tileSize);
 				t.setScale(sf::Vector2f(tileSize/t.getLocalBounds().width, tileSize/t.getLocalBounds().height));
 				rTex.draw(t);

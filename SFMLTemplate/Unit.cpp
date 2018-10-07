@@ -1,6 +1,7 @@
 #include "Unit.h"
 
 int Unit::unitCount = 0;
+std::vector<Unit>* Unit::unit;
 
 Unit::Unit(std::string name, int player)
 {
@@ -10,7 +11,9 @@ Unit::Unit(std::string name, int player)
 	this->player = player;
 	this->name = name;
 	maxAP = 8;
+	maxHP = 20;
 	AP = maxAP;
+	HP = maxHP;
 	id = unitCount;
 	tile = sf::Vector2i(0, 0);
 	Tile::tileRef[tile.x][tile.y].unit = id;
@@ -18,6 +21,15 @@ Unit::Unit(std::string name, int player)
 
 Unit::~Unit()
 {
+}
+
+Unit * Unit::GetUnit(int id)
+{
+	for (int i = 0; i < unit->size(); i++) {
+		if (unit->at(i).id == id)
+			return &unit->at(i);
+	}
+	return nullptr;
 }
 
 int Distance(sf::Vector2i a, sf::Vector2i b) {
@@ -48,6 +60,25 @@ void Unit::MoveTo(sf::Vector2i pos)
 	}
 }
 
+void Unit::AttackTo(sf::Vector2i pos)
+{
+	Attack a = Attack("");
+	if (AP >= a.ap && Distance(tile, pos)<=a.range) {
+		Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
+		if (target != nullptr) {
+			AP -= a.ap;
+			target->GetAttacked(a);
+		}
+	}
+}
+
+void Unit::GetAttacked(Attack a)
+{
+	if (a.successful) {
+		HP -= a.physical;
+	}
+}
+
 void Unit::EndOfTurn()
 {
 	AP = maxAP;
@@ -55,6 +86,8 @@ void Unit::EndOfTurn()
 
 std::string Unit::Print()
 {
-	return "Selected: "+name+"\nAP: "+ std::to_string(AP)+"/"+std::to_string(maxAP) +"\nID: "+std::to_string(id);
+	return name+" (ID: " + std::to_string(id)+")" +
+		"\nAP: "+ std::to_string(AP)+"/"+std::to_string(maxAP) +
+		"\nHP: "+ std::to_string(HP)+"/"+std::to_string(maxHP);
 }
 

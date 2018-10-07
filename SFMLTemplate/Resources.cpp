@@ -4,9 +4,10 @@ std::map<std::string, sf::Texture> Resources::tile = {};
 std::map<std::string, sf::Font> Resources::font = {};
 bool Resources::ready = false;
 
+
 Resources::Resources()
 {
-
+	srand(time(NULL));
 }
 
 
@@ -36,4 +37,9 @@ sf::Font * Resources::GetFont(std::string name)
 		return &font[name];
 	}
 	return nullptr;
+}
+
+short Resources::Roll()
+{
+	return rand()%100+1;
 }

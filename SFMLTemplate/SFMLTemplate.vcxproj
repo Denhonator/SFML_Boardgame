@@ -142,6 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Attack.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Constants.cpp" />
@@ -154,6 +155,7 @@
     <ClCompile Include="Unit.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Attack.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="Constants.h" />

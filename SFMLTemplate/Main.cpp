@@ -94,8 +94,8 @@ void Main::Draw()
 	for (unsigned int i = 0; i < mainScene.drawTiles.size(); i++) {
 		window.draw(mainScene.tiles.at(mainScene.drawTiles.at(i)));
 	}
-	for (unsigned int i = 0; i < mainScene.drawUnits.size(); i++) {
-		window.draw(mainScene.units.at(mainScene.drawUnits.at(i)).sprite);
+	for (unsigned int i = 0; i < mainScene.units.size(); i++) {
+		window.draw(mainScene.units.at(i).sprite);
 	}
 	for (unsigned int i = 0; i < mainScene.ui.size(); i++) {
 		window.draw(mainScene.ui.at(i));

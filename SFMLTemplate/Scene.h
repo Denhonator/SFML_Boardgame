@@ -14,14 +14,16 @@ public:
 	std::vector<sf::Sprite>* Update();
 	void AddTile(sf::Sprite* spr);
 	void AddUnit(Unit* unit);
+	void RemoveUnit(unsigned short i);
 	void SetTileSize(int size) { board.SetTileSize(size); };
 	void MouseHover(sf::Vector2i pos);
 	void Click();
 	void KeyPress(sf::Keyboard::Key key);
+	Unit* FindUnit(int id);
 	void SetUnit(int id);
 	void SetAction(std::string action);
 	void EndTurn();
-	void UpdateTexts();
+	void UpdateState();
 	Board* GetBoard() { return &board; };
 	std::vector<sf::Sprite> ui;
 	std::vector<sf::Sprite> tiles;
