@@ -17,6 +17,9 @@ public:
 	void SetTileSize(int size) { board.SetTileSize(size); };
 	void MouseHover(sf::Vector2i pos);
 	void Click();
+	void KeyPress(sf::Keyboard::Key key);
+	void SetUnit(int id);
+	void SetAction(std::string action);
 	Board* GetBoard() { return &board; };
 	std::vector<sf::Sprite> ui;
 	std::vector<sf::Sprite> tiles;
@@ -28,4 +31,6 @@ private:
 	Board board;
 	sf::Vector2i mouseTile;
 	int currentPlayer;
+	Unit* currentUnit;
+	std::string currentAction;
 };

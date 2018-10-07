@@ -13,10 +13,15 @@ Scene::Scene()
 	AddTile(&sf::Sprite(bg));
 	ui.push_back(sf::Sprite(*Resources::GetTexture("ui/outline")));
 	ui.at(0).setScale(Constants::tileSize / ui.at(0).getLocalBounds().width, Constants::tileSize / ui.at(0).getLocalBounds().height);
-	texts.push_back(sf::Text("", *Resources::GetFont("default.ttf")));
+	for (int i = 0; i < 10; i++) {
+		texts.push_back(sf::Text("", *Resources::GetFont("default.ttf")));
+		texts.at(i).setPosition(sf::Vector2f(0, i * 100));
+	}
 	mouseTile = sf::Vector2i(0, 0);
 	AddUnit(&Unit("swordguy", 1));
 	currentPlayer = 1;
+	currentUnit = nullptr;
+	currentAction = "";
 }
 
 Scene::~Scene()
@@ -57,11 +62,52 @@ void Scene::MouseHover(sf::Vector2i pos)
 	//printf("%d, %d\n", mouseTile.x, mouseTile.y);
 }
 
+void Scene::SetUnit(int id)
+{
+	currentUnit = nullptr;
+	if (id != -1) {
+		for (int i = 0; i < units.size(); i++) {
+			if (units.at(i).id == id) {
+				if (units.at(i).player == currentPlayer)
+					currentUnit = &units.at(i);
+			}
+		}
+	}
+	texts.at(1).setString(currentUnit!=nullptr ? currentUnit->Print() : "");
+}
+
+void Scene::SetAction(std::string action)
+{
+	if (currentUnit == nullptr)
+		currentAction = "";
+	else
+		currentAction = action;
+	texts.at(2).setString("Action: "+currentAction);
+}
+
 void Scene::Click()
 {
-	for (int i = 0; i < units.size(); i++) {
-		if (units.at(i).player == currentPlayer) {
-			units.at(i).MoveTo(mouseTile);
+	if(currentAction=="")
+		SetUnit(board.GetTile(mouseTile.x, mouseTile.y).unit);
+	
+	if (currentUnit != nullptr) {
+		if (currentAction == "move") {
+			currentUnit->MoveTo(mouseTile);
+		}
+	}
+	else {
+		SetAction("");
+	}
+}
+
+void Scene::KeyPress(sf::Keyboard::Key key)
+{
+	if (currentUnit != nullptr) {
+		if (key == sf::Keyboard::M) {
+			SetAction("move");
+		}
+		else {
+			SetAction("");
 		}
 	}
 }

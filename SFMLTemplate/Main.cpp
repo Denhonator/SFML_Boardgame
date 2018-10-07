@@ -6,7 +6,7 @@ Main::Main()
 	sprites = new std::vector<sf::Sprite>;
 	mousePos = sf::Mouse::getPosition();
 	view = window.getView();
-	fixedView = window.getView();
+	fixedView = sf::View(sf::FloatRect(0, 0, window.getSize().x*1.25f, window.getSize().y*1.25f));
 
 	window.setFramerateLimit(55);
 	mainScene.SetTileSize(window.getSize().y / mainScene.GetBoard()->boardSize.y);
@@ -32,7 +32,7 @@ void Main::Events()
 
 		if (event.type == sf::Event::Resized) {
 			view.setSize(sf::Vector2f(window.getSize()));
-			fixedView = sf::View(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y));
+			fixedView = sf::View(sf::FloatRect(0, 0, window.getSize().x*1.25f, window.getSize().y*1.25f));
 			window.setView(view);
 			mainScene.SetTileSize(window.getSize().y / mainScene.GetBoard()->boardSize.y);
 		}
@@ -41,10 +41,11 @@ void Main::Events()
 			if (event.key.code == sf::Keyboard::F1) {
 				Console::enable = !Console::enable;
 			}
-			if (event.key.code == sf::Keyboard::Return) {
-				if (Console::enable) {
-					Console::Command(&mainScene);
-				}
+			if (event.key.code == sf::Keyboard::Return && Console::enable) {
+				Console::Command(&mainScene);
+			}
+			else {
+				mainScene.KeyPress(event.key.code);
 			}
 		}
 

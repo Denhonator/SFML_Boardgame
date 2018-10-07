@@ -11,6 +11,7 @@ public:
 	Unit(std::string name, int player=0);
 	~Unit();
 	void MoveTo(sf::Vector2i pos);
+	std::string Print();
 	int player;
 	int id;
 	sf::Vector2i tile;
