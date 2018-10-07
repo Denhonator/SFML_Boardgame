@@ -41,7 +41,7 @@ void Main::Events()
 			if (event.key.code == sf::Keyboard::F1) {
 				Console::enable = !Console::enable;
 			}
-			if (event.key.code == sf::Keyboard::Return && Console::enable) {
+			else if (event.key.code == sf::Keyboard::Return && Console::enable) {
 				Console::Command(&mainScene);
 			}
 			else {

@@ -11,6 +11,7 @@ public:
 	Unit(std::string name, int player=0);
 	~Unit();
 	void MoveTo(sf::Vector2i pos);
+	void EndOfTurn();
 	std::string Print();
 	int player;
 	int id;
@@ -19,4 +20,6 @@ public:
 private:
 	std::string name;
 	static int unitCount;
+	int maxAP;
+	int AP;
 };

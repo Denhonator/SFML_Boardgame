@@ -20,6 +20,8 @@ public:
 	void KeyPress(sf::Keyboard::Key key);
 	void SetUnit(int id);
 	void SetAction(std::string action);
+	void EndTurn();
+	void UpdateTexts();
 	Board* GetBoard() { return &board; };
 	std::vector<sf::Sprite> ui;
 	std::vector<sf::Sprite> tiles;
@@ -30,6 +32,7 @@ public:
 private:
 	Board board;
 	sf::Vector2i mouseTile;
+	std::vector<int> players;
 	int currentPlayer;
 	Unit* currentUnit;
 	std::string currentAction;

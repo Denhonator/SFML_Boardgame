@@ -15,13 +15,15 @@ Scene::Scene()
 	ui.at(0).setScale(Constants::tileSize / ui.at(0).getLocalBounds().width, Constants::tileSize / ui.at(0).getLocalBounds().height);
 	for (int i = 0; i < 10; i++) {
 		texts.push_back(sf::Text("", *Resources::GetFont("default.ttf")));
-		texts.at(i).setPosition(sf::Vector2f(0, i * 100));
+		texts.at(i).setPosition(sf::Vector2f(0, i * 130));
 	}
 	mouseTile = sf::Vector2i(0, 0);
 	AddUnit(&Unit("swordguy", 1));
 	currentPlayer = 1;
 	currentUnit = nullptr;
 	currentAction = "";
+	players = { 1 };
+	UpdateTexts();
 }
 
 Scene::~Scene()
@@ -47,6 +49,13 @@ void Scene::AddUnit(Unit * unit)
 {
 	units.push_back(*unit);
 	drawUnits.push_back(units.size() - 1);
+	bool found = false;
+	for (int i = 0; i < players.size(); i++) {
+		if (unit->player == players.at(i))
+			found = true;
+	}
+	if (!found)
+		players.push_back(unit->player);
 }
 
 sf::Vector2i LimitToBoard(sf::Vector2f tile, Board* board) {
@@ -73,7 +82,7 @@ void Scene::SetUnit(int id)
 			}
 		}
 	}
-	texts.at(1).setString(currentUnit!=nullptr ? currentUnit->Print() : "");
+	UpdateTexts();
 }
 
 void Scene::SetAction(std::string action)
@@ -82,7 +91,34 @@ void Scene::SetAction(std::string action)
 		currentAction = "";
 	else
 		currentAction = action;
-	texts.at(2).setString("Action: "+currentAction);
+	UpdateTexts();
+}
+
+void Scene::EndTurn()
+{
+	for (int i = 0; i < units.size(); i++) {
+		units.at(i).EndOfTurn();
+	}
+	for (int i = 0; i < players.size(); i++) {
+		if (currentPlayer == players.at(i)) {
+			if (i == players.size() - 1)
+				currentPlayer = players.at(0);
+			else
+				currentPlayer = players.at(i + 1);
+			break;
+		}
+	}
+	currentUnit = nullptr;
+	currentAction = "";
+	UpdateTexts();
+}
+
+void Scene::UpdateTexts()
+{
+	texts.at(0).setString(board.GetTile(mouseTile.x, mouseTile.y).Print());
+	texts.at(1).setString(currentUnit != nullptr ? currentUnit->Print() : "");
+	texts.at(2).setString("Action: " + currentAction);
+	texts.at(3).setString("Current player: " + std::to_string(currentPlayer));
 }
 
 void Scene::Click()
@@ -98,10 +134,14 @@ void Scene::Click()
 	else {
 		SetAction("");
 	}
+	UpdateTexts();
 }
 
 void Scene::KeyPress(sf::Keyboard::Key key)
 {
+	if (key == sf::Keyboard::E) {
+		EndTurn();
+	}
 	if (currentUnit != nullptr) {
 		if (key == sf::Keyboard::M) {
 			SetAction("move");
@@ -110,4 +150,5 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 			SetAction("");
 		}
 	}
+	UpdateTexts();
 }
