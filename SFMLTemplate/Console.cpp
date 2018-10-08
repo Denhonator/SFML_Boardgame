@@ -57,16 +57,18 @@ void Console::Command(Scene* scene)
 		if (args.at(0) == "unit") {
 			try {
 				int player = 0;
+				std::string nick = "";
 				if (args.size() > 2)
 					player = std::stoi(std::string(args.at(2)));
-				scene->AddUnit(&Unit(std::string(args.at(1)), player));
+				if (args.size() > 3)
+					nick = args.at(3);
+				scene->AddUnit(&Unit(std::string(args.at(1)), player, nick));
 				printf("Unit added\n");
 			}
 			catch(const std::exception& e){
 				printf("Could not parse unit\n");
 			}
 		}
-
 		input.setString("");
 	}
 }

@@ -5,7 +5,7 @@ Scene::Scene()
 	srand(time(NULL));
 	for (int i = 0; i < board.boardSize.x; i++) {
 		for (int j = 0; j < board.boardSize.y; j++) {
-			if(rand()%101>30)
+			if(rand()%101>20)
 				board.InsertTile(i, j, Tile("grass"));
 		}
 	}
@@ -20,7 +20,7 @@ Scene::Scene()
 	mouseTile = sf::Vector2i(0, 0);
 	AddUnit(&Unit("swordguy", 1));
 	currentPlayer = 1;
-	currentUnit = nullptr;
+	currentUnit = -1;
 	currentAction = "";
 	players = { 1 };
 	UpdateState();
@@ -61,8 +61,8 @@ void Scene::AddUnit(Unit * unit)
 
 void Scene::RemoveUnit(unsigned short i)
 {
-	if (currentUnit->id == units.at(i).id) {
-		currentUnit = nullptr;
+	if (currentUnit == units.at(i).id) {
+		currentUnit = -1;
 		currentAction = "";
 	}
 	Tile::tileRef[units.at(i).tile.x][units.at(i).tile.y].unit = -1;
@@ -102,13 +102,13 @@ Unit * Scene::FindUnit(int id)
 
 void Scene::SetUnit(int id)
 {
-	currentUnit = FindUnit(id);
+	currentUnit = id;
 	UpdateState();
 }
 
 void Scene::SetAction(std::string action)
 {
-	if (currentUnit == nullptr)
+	if (currentUnit == -1)
 		currentAction = "";
 	else
 		currentAction = action;
@@ -129,7 +129,7 @@ void Scene::EndTurn()
 			break;
 		}
 	}
-	currentUnit = nullptr;
+	currentUnit = -1;
 	currentAction = "";
 	UpdateState();
 }
@@ -146,22 +146,23 @@ void Scene::UpdateState()
 			players.push_back(units.at(i).player);
 		}
 	}
-	for (int i = 0; i < units.size(); i++) {
-		if (currentUnit!=nullptr && units.at(i).id == currentUnit->id)
-			currentUnit = &units.at(i);
-	}
-	texts.at(5).setString(board.GetTile(mouseTile.x, mouseTile.y).Print());
-	texts.at(1).setString(currentUnit != nullptr ? currentUnit->Print() : "");
-	texts.at(2).setString("Action: " + currentAction);
 	texts.at(0).setString("Current player: " + std::to_string(currentPlayer));
+	texts.at(1).setString(currentUnit != -1 ? FindUnit(currentUnit)->Print() : "");
+	texts.at(2).setString(currentUnit != -1 ? "Action: " + currentAction : "");
+	texts.at(5).setString(board.GetTile(mouseTile.x, mouseTile.y).Print());
 	Unit* u = Unit::GetUnit(board.GetTile(mouseTile.x, mouseTile.y).unit);
 	texts.at(6).setString(u != nullptr ? u->Print() : "");
+	for (int i = 0; i < 9; i++) {
+		if (i == 4)
+			continue;
+		texts.at(i + 1).setPosition(texts.at(i+1).getPosition().x, texts.at(i).getGlobalBounds().top + texts.at(i).getGlobalBounds().height + 20);
+	}
 }
 
 void Scene::Click()
 {
 	if (mouseTile.x < 0) {
-		currentUnit = nullptr;
+		currentUnit = -1;
 		currentAction = "";
 		UpdateState();
 		return;
@@ -169,12 +170,12 @@ void Scene::Click()
 	if(currentAction=="")
 		SetUnit(board.GetTile(mouseTile.x, mouseTile.y).unit);
 	
-	if (currentUnit != nullptr) {
+	if (currentUnit != -1) {
 		if (currentAction == "move") {
-			currentUnit->MoveTo(mouseTile);
+			FindUnit(currentUnit)->MoveTo(mouseTile);
 		}
 		else if (currentAction == "attack") {
-			currentUnit->AttackTo(mouseTile);
+			FindUnit(currentUnit)->AttackTo(mouseTile);
 		}
 	}
 	else {
@@ -188,7 +189,7 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 	if (key == sf::Keyboard::E) {
 		EndTurn();
 	}
-	if (currentUnit != nullptr) {
+	if (currentUnit != -1) {
 		if (key == sf::Keyboard::M) {
 			SetAction("move");
 		}

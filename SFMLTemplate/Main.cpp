@@ -44,7 +44,7 @@ void Main::Events()
 			else if (event.key.code == sf::Keyboard::Return && Console::enable) {
 				Console::Command(&mainScene);
 			}
-			else {
+			else if(!Console::enable) {
 				mainScene.KeyPress(event.key.code);
 			}
 		}

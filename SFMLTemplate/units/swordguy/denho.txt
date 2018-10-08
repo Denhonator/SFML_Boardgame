@@ -1,0 +1,8 @@
+strength=4,10
+dexterity=4,10
+perception=4,10
+charisma=4,10
+willpower=4,15
+intelligence=4,15
+vitality=4,10
+luck=4,10

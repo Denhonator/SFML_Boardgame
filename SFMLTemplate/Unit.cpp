@@ -2,16 +2,21 @@
 
 int Unit::unitCount = 0;
 std::vector<Unit>* Unit::unit;
+std::vector<std::string> Unit::attributes = { "strength","dexterity","perception","charisma","willpower","intelligence","vitality","luck" };
 
-Unit::Unit(std::string name, int player)
+Unit::Unit(std::string name, int player, std::string nick)
 {
 	unitCount++;
 	sprite.setTexture(*Resources::GetTexture("units/" + name + "/" + name));
 	sprite.setScale(sf::Vector2f(Constants::tileSize / sprite.getLocalBounds().width, Constants::tileSize / sprite.getLocalBounds().height));
 	this->player = player;
 	this->name = name;
-	maxAP = 8;
-	maxHP = 20;
+	if (nick == "")
+		nick = name;
+	this->nick = nick;
+	LoadFromFile("units/" + name + "/" + nick);
+	maxAP = 14+attribute["dexterity"];
+	maxHP = 3*attribute["vitality"];
 	AP = maxAP;
 	HP = maxHP;
 	id = unitCount;
@@ -30,6 +35,30 @@ Unit * Unit::GetUnit(int id)
 			return &unit->at(i);
 	}
 	return nullptr;
+}
+
+void Unit::LoadFromFile(std::string path)
+{
+	std::vector<std::string> info = Resources::GetText(path);
+	std::string buffer = "";
+	for (int i = 0; i < info.size(); i++) {
+		//std::cout << info.at(i) << "\n";
+		buffer = "";
+		for (int j = 0; j < attributes.size(); j++) {
+			if (info.at(i).substr(0, attributes.at(j).size()) == attributes.at(j)) {
+				for (int k = attributes.at(j).size()+1; k < info.at(i).size(); k++) {
+					if (info.at(i)[k] != ',') {
+						buffer += info.at(i)[k];
+					}
+					else {
+						attribute[attributes.at(j)] = std::stoi(buffer);
+						buffer = "";
+					}
+				}
+				attributeGain[attributes.at(j)] = std::stoi(buffer);
+			}
+		}
+	}
 }
 
 int Distance(sf::Vector2i a, sf::Vector2i b) {
@@ -86,7 +115,7 @@ void Unit::EndOfTurn()
 
 std::string Unit::Print()
 {
-	return name+" (ID: " + std::to_string(id)+")" +
+	return nick+" (ID: " + std::to_string(id)+")" +
 		"\nAP: "+ std::to_string(AP)+"/"+std::to_string(maxAP) +
 		"\nHP: "+ std::to_string(HP)+"/"+std::to_string(maxHP);
 }

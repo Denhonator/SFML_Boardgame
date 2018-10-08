@@ -39,6 +39,22 @@ sf::Font * Resources::GetFont(std::string name)
 	return nullptr;
 }
 
+std::vector<std::string> Resources::GetText(std::string path)
+{
+	std::vector<std::string> list;
+	std::string line;
+	std::ifstream file(path+".txt");
+	if (file.is_open())
+	{
+		while (getline(file, line))
+		{
+			list.push_back(line);
+		}
+		file.close();
+	}
+	return list;
+}
+
 short Resources::Roll()
 {
 	return rand()%100+1;

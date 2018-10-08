@@ -9,9 +9,10 @@
 class Unit
 {
 public:
-	Unit(std::string name, int player=0);
+	Unit(std::string name, int player=0, std::string nick="");
 	~Unit();
 	static Unit* GetUnit(int id);
+	void LoadFromFile(std::string path);
 	void MoveTo(sf::Vector2i pos);
 	void AttackTo(sf::Vector2i pos);
 	void GetAttacked(Attack a);
@@ -24,10 +25,14 @@ public:
 	sf::Sprite sprite;
 	static std::vector<Unit>* unit;
 private:
-	std::string name;
 	static int unitCount;
-	short maxAP;
-	short AP;
-	short maxHP;
-	short HP;
+	static std::vector<std::string> attributes;
+	std::string name;
+	std::string nick;
+	short maxAP, AP;
+	short maxHP, HP;
+	short maxMP, MP;
+	short XP;
+	std::map<std::string, short> attribute;
+	std::map<std::string, short> attributeGain;
 };

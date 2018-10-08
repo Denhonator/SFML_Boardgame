@@ -36,6 +36,6 @@ private:
 	sf::Vector2i mouseTile;
 	std::vector<int> players;
 	int currentPlayer;
-	Unit* currentUnit;
+	int currentUnit;
 	std::string currentAction;
 };
