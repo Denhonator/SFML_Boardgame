@@ -55,7 +55,7 @@ std::vector<std::string> Resources::GetText(std::string path)
 	return list;
 }
 
-std::pair<std::string, std::vector<int>> Resources::KeyWithValues(std::string line)
+std::pair<std::string, std::vector<int>> Resources::KeyWithInts(std::string line)
 {
 	std::string buffer = "";
 	std::pair<std::string, std::vector<int>> temp;
@@ -75,6 +75,29 @@ std::pair<std::string, std::vector<int>> Resources::KeyWithValues(std::string li
 		}
 	}
 	temp.second.push_back(std::stoi(buffer));
+	return temp;
+}
+
+std::pair<std::string, std::vector<std::string>> Resources::KeyWithStrings(std::string line)
+{
+	std::string buffer = "";
+	std::pair<std::string, std::vector<std::string>> temp;
+	temp.first = "";
+
+	for (int k = 0; k < line.size(); k++) {
+		if (line[k] == '=' && temp.first=="") {
+			temp.first = buffer;
+			buffer = "";
+		}
+		else if (line[k] == ',') {
+			temp.second.push_back(buffer);
+			buffer = "";
+		}
+		else {
+			buffer += line[k];
+		}
+	}
+	temp.second.push_back(buffer);
 	return temp;
 }
 

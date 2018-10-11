@@ -6,3 +6,4 @@ willpower=1,15
 intelligence=1,15
 vitality=1,10
 luck=1,10
+weapon=sword,1

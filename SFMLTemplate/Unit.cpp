@@ -45,10 +45,13 @@ void Unit::LoadFromFile(std::string path)
 	std::vector<std::string> info = Resources::GetText(path);
 	std::string buffer = "";
 	for (int i = 0; i < info.size(); i++) {
-		std::pair<std::string, std::vector<int>> temp = Resources::KeyWithValues(info.at(i));
+		std::pair<std::string, std::vector<std::string>> temp = Resources::KeyWithStrings(info.at(i));
 		if (Resources::StrInVector(temp.first, Constants::attributes)) {
-			attribute[temp.first] = temp.second.at(0);
-			attributeGain[temp.first] = temp.second.at(1);
+			attribute[temp.first] = std::stoi(temp.second.at(0));
+			attributeGain[temp.first] = std::stoi(temp.second.at(1));
+		}
+		else if (temp.first == "weapon") {
+			AddWeapon(temp.second.at(0), std::stoi(temp.second.at(1)));
 		}
 	}
 }
@@ -60,10 +63,10 @@ void Unit::AddWeapon(std::string name, short level)
 
 void Unit::SwitchWeapon(short i)
 {
-	if (AP < 2) {
+	if (AP < 2 || weapons.size()==1) {
 		return;
 	}
-	AP--;
+	AP-=2;
 	if (i >= 0 && i < weapons.size())
 		currentWeapon = i;
 	else {

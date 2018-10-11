@@ -9,7 +9,7 @@ Weapon::Weapon(std::string name, short level)
 	std::vector<std::string> info = Resources::GetText("weapons/" + name);
 	std::string buffer = "";
 	for (int i = 0; i < info.size(); i++) {
-		std::pair<std::string, std::vector<int>> temp = Resources::KeyWithValues(info.at(i));
+		std::pair<std::string, std::vector<int>> temp = Resources::KeyWithInts(info.at(i));
 		if (temp.first != "") {
 			short damage = (baseDamage * temp.second.at(1))/100;
 			attacks.push_back(Attack(temp.first, temp.second.at(0), Damage{ damage,0,0,0 }, 1, 5, 0));

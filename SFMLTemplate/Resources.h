@@ -13,7 +13,8 @@ public:
 	static sf::Texture* GetTexture(std::string name);
 	static sf::Font* GetFont(std::string name);
 	static std::vector<std::string> GetText(std::string path);
-	static std::pair<std::string, std::vector<int>> KeyWithValues(std::string line);
+	static std::pair<std::string, std::vector<int>> KeyWithInts(std::string line);
+	static std::pair<std::string, std::vector<std::string>> KeyWithStrings(std::string line);
 	static bool StrInVector(std::string s, std::vector<std::string> v);
 	static short Roll();
 	static bool isReady() { return ready; };
