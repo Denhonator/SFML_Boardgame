@@ -196,6 +196,12 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 		else if (key == sf::Keyboard::A) {
 			SetAction("attack");
 		}
+		else if (key == sf::Keyboard::W) {
+			FindUnit(currentPlayer)->SwitchWeapon();
+		}
+		else if (key == sf::Keyboard::Q) {
+			FindUnit(currentPlayer)->GetWeapon()->SwitchAttack();
+		}
 		else {
 			SetAction("");
 		}

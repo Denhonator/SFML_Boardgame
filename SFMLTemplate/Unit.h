@@ -4,7 +4,7 @@
 #include "Resources.h"
 #include "Constants.h"
 #include "Tile.h"
-#include "Attack.h"
+#include "Weapon.h"
 
 class Unit
 {
@@ -16,6 +16,9 @@ public:
 	void MoveTo(sf::Vector2i pos);
 	void AttackTo(sf::Vector2i pos);
 	void GetAttacked(Attack a);
+	void AddWeapon(std::string name, short level);
+	void SwitchWeapon(short i = -1);
+	Weapon* GetWeapon(short i = -1);
 	bool Dead() { return HP <= 0; };
 	void EndOfTurn();
 	std::string Print();
@@ -26,13 +29,14 @@ public:
 	static std::vector<Unit>* unit;
 private:
 	static int unitCount;
-	static std::vector<std::string> attributes;
 	std::string name;
 	std::string nick;
 	short maxAP, AP;
 	short maxHP, HP;
 	short maxMP, MP;
 	short XP;
+	short currentWeapon;
+	std::vector<Weapon> weapons;
 	std::map<std::string, short> attribute;
 	std::map<std::string, short> attributeGain;
 };

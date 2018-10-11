@@ -13,11 +13,17 @@ public:
 	static sf::Texture* GetTexture(std::string name);
 	static sf::Font* GetFont(std::string name);
 	static std::vector<std::string> GetText(std::string path);
+	static std::pair<std::string, std::vector<int>> KeyWithValues(std::string line);
+	static bool StrInVector(std::string s, std::vector<std::string> v);
 	static short Roll();
 	static bool isReady() { return ready; };
 private:
 	static std::map<std::string, sf::Texture> tile;
 	static std::map<std::string, sf::Font> font;
 	static bool ready;
+};
+
+struct Damage {
+	short physical, fire, ice, lightning;
 };
 

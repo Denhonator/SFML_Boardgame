@@ -55,6 +55,34 @@ std::vector<std::string> Resources::GetText(std::string path)
 	return list;
 }
 
+std::pair<std::string, std::vector<int>> Resources::KeyWithValues(std::string line)
+{
+	std::string buffer = "";
+	std::pair<std::string, std::vector<int>> temp;
+	temp.first = "";
+
+	for (int k = 0; k < line.size(); k++) {
+		if (line[k] == '=') {
+			temp.first = buffer;
+			buffer = "";
+		}
+		else if (line[k] == ',') {
+			temp.second.push_back(std::stoi(buffer));
+			buffer = "";
+		}
+		else {
+			buffer += line[k];
+		}
+	}
+	temp.second.push_back(std::stoi(buffer));
+	return temp;
+}
+
+bool Resources::StrInVector(std::string s, std::vector<std::string> v)
+{
+	return std::find(v.begin(), v.end(), s) != v.end();
+}
+
 short Resources::Roll()
 {
 	return rand()%100+1;

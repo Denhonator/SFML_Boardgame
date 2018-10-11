@@ -2,7 +2,6 @@
 
 int Unit::unitCount = 0;
 std::vector<Unit>* Unit::unit;
-std::vector<std::string> Unit::attributes = { "strength","dexterity","perception","charisma","willpower","intelligence","vitality","luck" };
 
 Unit::Unit(std::string name, int player, std::string nick)
 {
@@ -17,8 +16,12 @@ Unit::Unit(std::string name, int player, std::string nick)
 	LoadFromFile("units/" + name + "/" + nick);
 	maxAP = 14+attribute["dexterity"];
 	maxHP = 3*attribute["vitality"];
+	maxMP = 3 * attribute["intelligence"];
 	AP = maxAP;
 	HP = maxHP;
+	MP = maxMP;
+	AddWeapon("self", 1);
+	currentWeapon = 0;
 	id = unitCount;
 	tile = sf::Vector2i(0, 0);
 	Tile::tileRef[tile.x][tile.y].unit = id;
@@ -42,23 +45,40 @@ void Unit::LoadFromFile(std::string path)
 	std::vector<std::string> info = Resources::GetText(path);
 	std::string buffer = "";
 	for (int i = 0; i < info.size(); i++) {
-		//std::cout << info.at(i) << "\n";
-		buffer = "";
-		for (int j = 0; j < attributes.size(); j++) {
-			if (info.at(i).substr(0, attributes.at(j).size()) == attributes.at(j)) {
-				for (int k = attributes.at(j).size()+1; k < info.at(i).size(); k++) {
-					if (info.at(i)[k] != ',') {
-						buffer += info.at(i)[k];
-					}
-					else {
-						attribute[attributes.at(j)] = std::stoi(buffer);
-						buffer = "";
-					}
-				}
-				attributeGain[attributes.at(j)] = std::stoi(buffer);
-			}
+		std::pair<std::string, std::vector<int>> temp = Resources::KeyWithValues(info.at(i));
+		if (Resources::StrInVector(temp.first, Constants::attributes)) {
+			attribute[temp.first] = temp.second.at(0);
+			attributeGain[temp.first] = temp.second.at(1);
 		}
 	}
+}
+
+void Unit::AddWeapon(std::string name, short level)
+{
+	weapons.push_back(Weapon(name, level));
+}
+
+void Unit::SwitchWeapon(short i)
+{
+	if (AP < 2) {
+		return;
+	}
+	AP--;
+	if (i >= 0 && i < weapons.size())
+		currentWeapon = i;
+	else {
+		currentWeapon++;
+		if (currentWeapon >= weapons.size())
+			currentWeapon = 0;
+	}
+}
+
+Weapon * Unit::GetWeapon(short i)
+{
+	if (i<0 || i>weapons.size()) {
+		i = currentWeapon;
+	}
+	return &weapons.at(i);
 }
 
 int Distance(sf::Vector2i a, sf::Vector2i b) {
@@ -91,7 +111,7 @@ void Unit::MoveTo(sf::Vector2i pos)
 
 void Unit::AttackTo(sf::Vector2i pos)
 {
-	Attack a = Attack("");
+	Attack a = weapons.at(currentWeapon).GetAttack();
 	if (AP >= a.ap && Distance(tile, pos)<=a.range) {
 		Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
 		if (target != nullptr) {
@@ -104,7 +124,7 @@ void Unit::AttackTo(sf::Vector2i pos)
 void Unit::GetAttacked(Attack a)
 {
 	if (a.successful) {
-		HP -= a.physical;
+		HP -= a.damage.physical;
 	}
 }
 
@@ -115,8 +135,10 @@ void Unit::EndOfTurn()
 
 std::string Unit::Print()
 {
-	return nick+" (ID: " + std::to_string(id)+")" +
-		"\nAP: "+ std::to_string(AP)+"/"+std::to_string(maxAP) +
-		"\nHP: "+ std::to_string(HP)+"/"+std::to_string(maxHP);
+	return nick + " (ID: " + std::to_string(id) + ")" +
+		"\nHP: " + std::to_string(HP) + "/" + std::to_string(maxHP) +
+		"\nAP: " + std::to_string(AP) + "/" + std::to_string(maxAP) +
+		"\nMP: " + std::to_string(MP) + "/" + std::to_string(maxMP) +
+		"\n" + weapons.at(currentWeapon).Print();
 }
 

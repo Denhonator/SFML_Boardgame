@@ -1,16 +1,22 @@
 #include "Attack.h"
 
-Attack::Attack(std::string name)
+Attack::Attack(std::string name, short chancetohit, Damage d, short range, short ap, short mp)
 {
-	range = 1;
-	physical = 2;
-	ap = 3;
-	successThreshold = 50;
-	roll = Resources::Roll();
-	printf("%d/%d\n", roll, successThreshold);
-	successful = roll >= successThreshold;
+	this->name = name;
+	this->range = range;
+	damage = d;
+	this->ap = ap;
+	successThreshold = 100 - chancetohit;
+	roll = -1;
 }
 
 Attack::~Attack()
 {
+}
+
+void Attack::Roll()
+{
+	roll = Resources::Roll();
+	successful = roll >= successThreshold;
+	printf("%d/%d\n", roll, successThreshold);
 }
