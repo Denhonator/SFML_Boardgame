@@ -2,6 +2,7 @@
 
 sf::RectangleShape Console::bg;
 sf::Text Console::input;
+std::string Console::previous = "unit,swordguy,2";
 bool Console::enable = false;
 
 Console::Console()
@@ -48,7 +49,7 @@ std::vector<sf::String> Arguments(sf::String s) {
 void Console::Command(Scene* scene)
 {
 	if (input.getString().getSize() > 0) {
-		//std::cout << std::string(input.getString()) << std::endl;
+		previous = input.getString();
 		std::vector<sf::String> args = Arguments(input.getString());
 		for (int i = 0; i < args.size(); i++) {
 			std::cout << std::string(args.at(i)) << std::endl;
@@ -70,5 +71,12 @@ void Console::Command(Scene* scene)
 			}
 		}
 		input.setString("");
+	}
+}
+
+void Console::GetPrevious()
+{
+	if (previous != "") {
+		input.setString(previous);
 	}
 }

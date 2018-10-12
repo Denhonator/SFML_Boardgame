@@ -7,6 +7,7 @@ Main::Main()
 	mousePos = sf::Mouse::getPosition();
 	view = window.getView();
 	fixedView = sf::View(sf::FloatRect(0, 0, window.getSize().x*1.25f, window.getSize().y*1.25f));
+	Constants::UpdateView(fixedView);
 
 	window.setFramerateLimit(55);
 	mainScene.SetTileSize(window.getSize().y / mainScene.GetBoard()->boardSize.y);
@@ -33,6 +34,7 @@ void Main::Events()
 		if (event.type == sf::Event::Resized) {
 			view.setSize(sf::Vector2f(window.getSize()));
 			fixedView = sf::View(sf::FloatRect(0, 0, window.getSize().x*1.25f, window.getSize().y*1.25f));
+			Constants::UpdateView(fixedView);
 			window.setView(view);
 			mainScene.SetTileSize(window.getSize().y / mainScene.GetBoard()->boardSize.y);
 		}
@@ -43,6 +45,9 @@ void Main::Events()
 			}
 			else if (event.key.code == sf::Keyboard::Return && Console::enable) {
 				Console::Command(&mainScene);
+			}
+			else if (event.key.code == sf::Keyboard::Up && Console::enable) {
+				Console::GetPrevious();
 			}
 			else if(!Console::enable) {
 				mainScene.KeyPress(event.key.code);
@@ -86,6 +91,7 @@ void Main::Update()
 
 void Main::FixedUpdate()
 {
+	Messages::FadeNotice();
 }
 
 void Main::Draw()
@@ -95,7 +101,8 @@ void Main::Draw()
 		window.draw(mainScene.tiles.at(mainScene.drawTiles.at(i)));
 	}
 	for (unsigned int i = 0; i < mainScene.units.size(); i++) {
-		window.draw(mainScene.units.at(i).sprite);
+		if(!mainScene.units.at(i).Dead())
+			window.draw(mainScene.units.at(i).sprite);
 	}
 	for (unsigned int i = 0; i < mainScene.ui.size(); i++) {
 		window.draw(mainScene.ui.at(i));
@@ -104,6 +111,8 @@ void Main::Draw()
 	for (unsigned int i = 0; i < mainScene.texts.size(); i++) {
 		window.draw(mainScene.texts.at(i));
 	}
+	window.draw(Messages::log);
+	window.draw(Messages::notice);
 	if (Console::enable) {
 		Console::bg.setSize(sf::Vector2f(fixedView.getSize().x, fixedView.getSize().y/4));
 		window.draw(Console::bg);

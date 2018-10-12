@@ -18,5 +18,4 @@ void Attack::Roll()
 {
 	roll = Resources::Roll();
 	successful = roll >= successThreshold;
-	printf("%d/%d\n", roll, successThreshold);
 }

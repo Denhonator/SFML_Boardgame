@@ -64,9 +64,12 @@ void Unit::AddWeapon(std::string name, short level)
 void Unit::SwitchWeapon(short i)
 {
 	if (AP < 2 || weapons.size()==1) {
+		if (AP < 2)
+			Messages::Notice("Not enough AP to switch weapon");
+		else
+			Messages::Notice("You only have one weapon");
 		return;
 	}
-	AP-=2;
 	if (i >= 0 && i < weapons.size())
 		currentWeapon = i;
 	else {
@@ -74,6 +77,7 @@ void Unit::SwitchWeapon(short i)
 		if (currentWeapon >= weapons.size())
 			currentWeapon = 0;
 	}
+	AP -= 2;
 }
 
 Weapon * Unit::GetWeapon(short i)
@@ -114,12 +118,15 @@ void Unit::MoveTo(sf::Vector2i pos)
 
 void Unit::AttackTo(sf::Vector2i pos)
 {
-	Attack a = weapons.at(currentWeapon).GetAttack();
-	if (AP >= a.ap && Distance(tile, pos)<=a.range) {
-		Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
-		if (target != nullptr) {
-			AP -= a.ap;
-			target->GetAttacked(a);
+	if (weapons.at(currentWeapon).CanUse(attribute)) {
+		Attack a = weapons.at(currentWeapon).GetAttack();
+		if (AP >= a.ap && Distance(tile, pos) <= a.range) {
+			Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
+			if (target != nullptr) {
+				AP -= a.ap;
+				Messages::Add(name + " rolls " + std::to_string(a.roll) + "/" + std::to_string(a.successThreshold) + " on " + a.name + " against " + target->name);
+				target->GetAttacked(a);
+			}
 		}
 	}
 }
@@ -128,6 +135,7 @@ void Unit::GetAttacked(Attack a)
 {
 	if (a.successful) {
 		HP -= a.damage.physical;
+		Messages::Add(name + " takes " + std::to_string(a.damage.physical) + " damage");
 	}
 }
 

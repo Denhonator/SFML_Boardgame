@@ -18,6 +18,7 @@ void FixedLoop(Main* game) {
 int main()
 {
 	Resources res;
+	Messages mes;
 	Main game;
 	std::thread loop(FixedLoop, &game);
 

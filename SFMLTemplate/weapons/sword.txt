@@ -1,2 +1,4 @@
+strength=6,1
+dexterity=6,1
 thrust=50,130
 slash=60,100

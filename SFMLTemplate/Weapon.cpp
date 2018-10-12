@@ -9,10 +9,15 @@ Weapon::Weapon(std::string name, short level)
 	std::vector<std::string> info = Resources::GetText("weapons/" + name);
 	std::string buffer = "";
 	for (int i = 0; i < info.size(); i++) {
-		std::pair<std::string, std::vector<int>> temp = Resources::KeyWithInts(info.at(i));
+		std::pair<std::string, std::vector<std::string>> temp = Resources::KeyWithStrings(info.at(i));
 		if (temp.first != "") {
-			short damage = (baseDamage * temp.second.at(1))/100;
-			attacks.push_back(Attack(temp.first, temp.second.at(0), Damage{ damage,0,0,0 }, 1, 5, 0));
+			if (Resources::StrInVector(temp.first, Constants::attributes)) {
+				requirment[temp.first] = std::stoi(temp.second.at(0)) + std::stoi(temp.second.at(1))*(level - 1);
+			}
+			else {
+				short damage = (baseDamage * std::stoi(temp.second.at(1))) / 100;
+				attacks.push_back(Attack(temp.first, std::stoi(temp.second.at(0)), Damage{ damage,0,0,0 }, 1, 5, 0));
+			}
 		}
 	}
 }
@@ -49,4 +54,16 @@ Attack Weapon::GetAttack(short i)
 		i = currentAttack;
 	attacks.at(i).Roll();
 	return attacks.at(i);
+}
+
+bool Weapon::CanUse(std::map<std::string, short> attributes)
+{
+	for (int i = 0; i < Constants::attributes.size(); i++) {
+		if (requirment.count(Constants::attributes.at(i))) {
+			if (attributes[Constants::attributes.at(i)] < requirment[Constants::attributes.at(i)]) {
+				return false;
+			}
+		}
+	}
+	return true;
 }

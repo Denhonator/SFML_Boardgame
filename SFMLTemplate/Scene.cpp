@@ -66,7 +66,7 @@ void Scene::RemoveUnit(unsigned short i)
 		currentAction = "";
 	}
 	Tile::tileRef[units.at(i).tile.x][units.at(i).tile.y].unit = -1;
-	units.erase(units.begin() + i);
+	//units.erase(units.begin() + i);
 }
 
 sf::Vector2i LimitToBoard(sf::Vector2f tile, Board* board) {
@@ -140,7 +140,6 @@ void Scene::UpdateState()
 	for (int i = 0; i < units.size(); i++) {
 		if (units.at(i).Dead()) {
 			RemoveUnit(i);
-			i--;
 		}
 		else if (std::find(players.begin(), players.end(), units.at(i).player) == players.end()) {
 			players.push_back(units.at(i).player);
@@ -197,10 +196,10 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 			SetAction("attack");
 		}
 		else if (key == sf::Keyboard::W) {
-			FindUnit(currentPlayer)->SwitchWeapon();
+			FindUnit(currentUnit)->SwitchWeapon();
 		}
 		else if (key == sf::Keyboard::Q) {
-			FindUnit(currentPlayer)->GetWeapon()->SwitchAttack();
+			FindUnit(currentUnit)->GetWeapon()->SwitchAttack();
 		}
 		else {
 			SetAction("");
