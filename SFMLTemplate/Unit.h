@@ -23,10 +23,12 @@ public:
 	bool Dead() { return HP <= 0; };
 	void EndOfTurn();
 	std::string Print();
+	void UpdateBars();
 	int player;
 	int id;
 	sf::Vector2i tile;
 	sf::Sprite sprite;
+	sf::VertexArray bars;
 	static std::vector<Unit>* unit;
 private:
 	static int unitCount;

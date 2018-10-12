@@ -2,14 +2,14 @@
 
 std::map<std::string, sf::Texture> Resources::tile = {};
 std::map<std::string, sf::Font> Resources::font = {};
+std::map<std::string, sf::SoundBuffer> Resources::sound;
+std::vector<sf::Sound> Resources::player;
 bool Resources::ready = false;
-
 
 Resources::Resources()
 {
 	srand(time(NULL));
 }
-
 
 Resources::~Resources()
 {
@@ -53,6 +53,28 @@ std::vector<std::string> Resources::GetText(std::string path)
 		file.close();
 	}
 	return list;
+}
+
+void Resources::PlayWav(std::string s)
+{
+	short index = -1;
+	for (int i = 0; i < player.size(); i++) {
+		if (player.at(i).getStatus() != sf::Sound::Status::Playing) {
+			index = i;
+			break;
+		}
+	}
+	if (index < 0) {
+		player.push_back(sf::Sound());
+		index = player.size() - 1;
+	}
+	if (!sound.count(s)) {
+		sf::SoundBuffer buffer;
+		buffer.loadFromFile("sounds/" + s + ".wav");
+		sound[s] = buffer;
+	}
+	player.at(index).setBuffer(sound[s]);
+	player.at(index).play();
 }
 
 std::pair<std::string, std::vector<int>> Resources::KeyWithInts(std::string line)

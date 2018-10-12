@@ -51,9 +51,6 @@ void Console::Command(Scene* scene)
 	if (input.getString().getSize() > 0) {
 		previous = input.getString();
 		std::vector<sf::String> args = Arguments(input.getString());
-		for (int i = 0; i < args.size(); i++) {
-			std::cout << std::string(args.at(i)) << std::endl;
-		}
 
 		if (args.at(0) == "unit") {
 			try {
@@ -64,10 +61,10 @@ void Console::Command(Scene* scene)
 				if (args.size() > 3)
 					nick = args.at(3);
 				scene->AddUnit(&Unit(std::string(args.at(1)), player, nick));
-				printf("Unit added\n");
+				Messages::Notice("Unit added");
 			}
 			catch(const std::exception& e){
-				printf("Could not parse unit\n");
+				Messages::Notice("Could not parse unit");
 			}
 		}
 		input.setString("");

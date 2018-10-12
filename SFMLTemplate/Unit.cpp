@@ -13,6 +13,7 @@ Unit::Unit(std::string name, int player, std::string nick)
 	if (nick == "")
 		nick = name;
 	this->nick = nick;
+	XP = 0;
 	LoadFromFile("units/" + name + "/" + nick);
 	maxAP = 14+attribute["dexterity"];
 	maxHP = 3*attribute["vitality"];
@@ -25,6 +26,8 @@ Unit::Unit(std::string name, int player, std::string nick)
 	id = unitCount;
 	tile = sf::Vector2i(0, 0);
 	Tile::tileRef[tile.x][tile.y].unit = id;
+	bars = sf::VertexArray(sf::PrimitiveType::TriangleStrip, 8);
+	UpdateBars();
 }
 
 Unit::~Unit()
@@ -52,6 +55,9 @@ void Unit::LoadFromFile(std::string path)
 		}
 		else if (temp.first == "weapon") {
 			AddWeapon(temp.second.at(0), std::stoi(temp.second.at(1)));
+		}
+		else if (temp.first == "xp") {
+			XP = std::stoi(temp.second.at(0));
 		}
 	}
 }
@@ -112,6 +118,7 @@ void Unit::MoveTo(sf::Vector2i pos)
 			Tile::tileRef[tile.x][tile.y].unit = -1;
 			tile = pos;
 			Tile::tileRef[tile.x][tile.y].unit = id;
+			UpdateBars();
 		}
 	}
 }
@@ -127,7 +134,13 @@ void Unit::AttackTo(sf::Vector2i pos)
 				Messages::Add(name + " rolls " + std::to_string(a.roll) + "/" + std::to_string(a.successThreshold) + " on " + a.name + " against " + target->name);
 				target->GetAttacked(a);
 			}
+			else {
+				Messages::Notice("Invalid target");
+			}
 		}
+	}
+	else {
+		Messages::Notice("Unable to use current weapon");
 	}
 }
 
@@ -135,7 +148,12 @@ void Unit::GetAttacked(Attack a)
 {
 	if (a.successful) {
 		HP -= a.damage.physical;
+		UpdateBars();
+		Resources::PlayWav("hit");
 		Messages::Add(name + " takes " + std::to_string(a.damage.physical) + " damage");
+	}
+	else {
+		Resources::PlayWav("woosh");
 	}
 }
 
@@ -151,5 +169,24 @@ std::string Unit::Print()
 		"\nAP: " + std::to_string(AP) + "/" + std::to_string(maxAP) +
 		"\nMP: " + std::to_string(MP) + "/" + std::to_string(maxMP) +
 		"\n" + weapons.at(currentWeapon).Print();
+}
+
+void Unit::UpdateBars()
+{
+	float width = Constants::tileSize / 30;
+	float heigth = Constants::tileSize*std::pow(maxHP/30.0f,1.0f);
+	sf::Vector2f offset = sf::Vector2f(2, Constants::tileSize / 2 - heigth / 2);
+	float line = heigth * (1.0f-((float)HP / (float)maxHP));
+	bars[0].position = sprite.getPosition() + offset;
+	bars[1].position = sprite.getPosition() + offset + sf::Vector2f(width, 0);
+	bars[2].position = sprite.getPosition() + offset + sf::Vector2f(0, line);
+	bars[3].position = sprite.getPosition() + offset + sf::Vector2f(width, line);
+	bars[4].position = sprite.getPosition() + offset + sf::Vector2f(0, line);
+	bars[5].position = sprite.getPosition() + offset + sf::Vector2f(width, line);
+	bars[6].position = sprite.getPosition() + offset + sf::Vector2f(0, heigth);
+	bars[7].position = sprite.getPosition() + offset + sf::Vector2f(width, heigth);
+	for (short i = 0; i < 8; i++) {
+		bars[i].color = sf::Color(i<4?0:200, 0, 0, 255);
+	}
 }
 

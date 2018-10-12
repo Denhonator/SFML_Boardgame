@@ -101,8 +101,10 @@ void Main::Draw()
 		window.draw(mainScene.tiles.at(mainScene.drawTiles.at(i)));
 	}
 	for (unsigned int i = 0; i < mainScene.units.size(); i++) {
-		if(!mainScene.units.at(i).Dead())
+		if (!mainScene.units.at(i).Dead()) {
 			window.draw(mainScene.units.at(i).sprite);
+			window.draw(mainScene.units.at(i).bars);
+		}
 	}
 	for (unsigned int i = 0; i < mainScene.ui.size(); i++) {
 		window.draw(mainScene.ui.at(i));

@@ -92,8 +92,7 @@ Unit * Scene::FindUnit(int id)
 	if (id != -1) {
 		for (int i = 0; i < units.size(); i++) {
 			if (units.at(i).id == id) {
-				if (units.at(i).player == currentPlayer)
-					return &units.at(i);
+				return &units.at(i);
 			}
 		}
 	}
@@ -102,8 +101,10 @@ Unit * Scene::FindUnit(int id)
 
 void Scene::SetUnit(int id)
 {
-	currentUnit = id;
-	UpdateState();
+	if (FindUnit(id)->player == currentPlayer) {
+		currentUnit = id;
+		UpdateState();
+	}
 }
 
 void Scene::SetAction(std::string action)
