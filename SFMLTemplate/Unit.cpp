@@ -130,8 +130,17 @@ void Unit::AttackTo(sf::Vector2i pos)
 		if (AP >= a.ap && Distance(tile, pos) <= a.range) {
 			Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
 			if (target != nullptr) {
+				Messages::Prompt("Attack friendly unit " + target->nick + "?");
+				while (target->player==player) {
+					sf::sleep(sf::milliseconds(2));
+					sf::Keyboard::Key key = Messages::WaitInput();
+					if (key == sf::Keyboard::Key::Y)
+						break;
+					else if (key != sf::Keyboard::Key::Unknown)
+						return;
+				}
 				AP -= a.ap;
-				Messages::Add(name + " rolls " + std::to_string(a.roll) + "/" + std::to_string(a.successThreshold) + " on " + a.name + " against " + target->name);
+				Messages::Add(name + " rolls " + std::to_string(a.roll) + "/" + std::to_string(a.successThreshold) + " on " + a.name + " against " + target->nick);
 				target->GetAttacked(a);
 			}
 			else {

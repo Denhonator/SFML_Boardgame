@@ -4,15 +4,26 @@ std::map<std::string, sf::Texture> Resources::tile = {};
 std::map<std::string, sf::Font> Resources::font = {};
 std::map<std::string, sf::SoundBuffer> Resources::sound;
 std::vector<sf::Sound> Resources::player;
-bool Resources::ready = false;
+short Resources::roll = 0;
+
+void Resources::RollerFunction() {
+	srand(time(NULL));
+	while (running) {
+		sf::sleep(sf::milliseconds(5));
+		roll = rand() % 100 + 1;
+	}
+}
 
 Resources::Resources()
 {
-	srand(time(NULL));
+	running = true;
+	roller = std::thread(&Resources::RollerFunction, this);
 }
 
 Resources::~Resources()
 {
+	running = false;
+	roller.join();
 }
 
 sf::Texture * Resources::GetTexture(std::string name)
@@ -130,5 +141,5 @@ bool Resources::StrInVector(std::string s, std::vector<std::string> v)
 
 short Resources::Roll()
 {
-	return rand()%100+1;
+	return roll;
 }

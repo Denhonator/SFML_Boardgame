@@ -16,7 +16,10 @@ Main::Main()
 
 Main::~Main()
 {
-
+	if (keyThread.joinable())
+		keyThread.join();
+	if (mouseThread.joinable())
+		mouseThread.join();
 }
 
 float clamp(float val, float min, float max) {
@@ -50,7 +53,13 @@ void Main::Events()
 				Console::GetPrevious();
 			}
 			else if(!Console::enable) {
-				mainScene.KeyPress(event.key.code);
+				if (keyThread.joinable() && !Messages::prompting)
+					keyThread.join();
+				if (keyThread.joinable()&&Messages::prompting) {
+					Messages::SetInput(event.key.code);
+				}
+				else
+					keyThread = std::thread(&Scene::KeyPress, &mainScene, event.key.code);
 			}
 		}
 
@@ -78,8 +87,15 @@ void Main::Events()
 		}
 
 		if (event.type == sf::Event::MouseButtonPressed) {
-			if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
-				mainScene.Click();
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+				if (mouseThread.joinable() && !Messages::prompting)
+					mouseThread.join();
+				if (mouseThread.joinable() && Messages::prompting) {
+					Messages::Click(window.mapPixelToCoords(mousePos, fixedView));
+				}
+				else
+					mouseThread = std::thread(&Scene::Click, &mainScene);
+			}
 		}
 	}
 }
@@ -114,6 +130,8 @@ void Main::Draw()
 		window.draw(mainScene.texts.at(i));
 	}
 	window.draw(Messages::log);
+	if(Messages::prompting)
+		window.draw(Messages::prompt);
 	window.draw(Messages::notice);
 	if (Console::enable) {
 		Console::bg.setSize(sf::Vector2f(fixedView.getSize().x, fixedView.getSize().y/4));

@@ -32,7 +32,7 @@ Scene::~Scene()
 
 std::vector<sf::Sprite>* Scene::Update()
 {
-	if (Resources::isReady()) {
+	if (board.refresh) {
 		tiles.at(0).setTexture(board.GetTexture(board.refresh)->getTexture());
 		board.refresh = false;
 	}
@@ -170,7 +170,7 @@ void Scene::Click()
 	if(currentAction=="")
 		SetUnit(board.GetTile(mouseTile.x, mouseTile.y).unit);
 	
-	if (currentUnit != -1) {
+	if (currentUnit != -1 && !Messages::prompting) {
 		if (currentAction == "move") {
 			FindUnit(currentUnit)->MoveTo(mouseTile);
 		}
@@ -189,7 +189,7 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 	if (key == sf::Keyboard::E) {
 		EndTurn();
 	}
-	if (currentUnit != -1) {
+	if (currentUnit != -1 && !Messages::prompting) {
 		if (key == sf::Keyboard::M) {
 			SetAction("move");
 		}

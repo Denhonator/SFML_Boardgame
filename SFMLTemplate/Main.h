@@ -4,6 +4,7 @@
 #include "Time.h"
 #include <stdio.h>
 #include "Console.h"
+#include <thread>
 
 class Main
 {
@@ -16,13 +17,15 @@ public:
 	 void Draw();
 	 sf::RenderWindow* GetWindow();
 private:
-	 sf::RenderWindow window;
-	 std::vector<sf::Sprite>* tiles;
-	 std::vector<sf::Sprite>* sprites;
-	 Scene mainScene;
-	 Time timeObject;
-	 sf::View view;
-	 sf::View fixedView;
-	 sf::Vector2i mousePos;
+	std::thread keyThread;
+	std::thread mouseThread;
+	sf::RenderWindow window;
+	std::vector<sf::Sprite>* tiles;
+	std::vector<sf::Sprite>* sprites;
+	Scene mainScene;
+	Time timeObject;
+	sf::View view;
+	sf::View fixedView;
+	sf::Vector2i mousePos;
 };
 

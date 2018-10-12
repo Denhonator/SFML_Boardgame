@@ -6,6 +6,7 @@
 #include <fstream>
 #include <random>
 #include "Constants.h"
+#include <thread>
 
 class Resources
 {
@@ -20,13 +21,15 @@ public:
 	static std::pair<std::string, std::vector<std::string>> KeyWithStrings(std::string line);
 	static bool StrInVector(std::string s, std::vector<std::string> v);
 	static short Roll();
-	static bool isReady() { return ready; };
 private:
+	void RollerFunction();
 	static std::map<std::string, sf::Texture> tile;
 	static std::map<std::string, sf::Font> font;
 	static std::map<std::string, sf::SoundBuffer> sound;
 	static std::vector<sf::Sound> player;
-	static bool ready;
+	static short roll;
+	std::thread roller;
+	bool running;
 };
 
 struct Damage {
