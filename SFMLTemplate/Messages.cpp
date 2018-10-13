@@ -29,11 +29,14 @@ void Messages::Add(std::string s)
 		texts.erase(texts.begin());
 		texts.shrink_to_fit();
 	}
-	log.setString("");
+	std::string buffer = "";
 	for (int i = 0; i < texts.size(); i++) {
-		log.setString(log.getString() + texts.at(i)+"\n");
+		buffer += texts.at(i);
+		if (i < texts.size() - 1)
+			buffer += "\n";
 	}
-	log.setPosition(Constants::fixedView.left + Constants::fixedView.width / 3, Constants::fixedView.top + Constants::fixedView.height - log.getGlobalBounds().height);
+	log.setString(buffer);
+	log.setPosition(Constants::fixedView.left + Constants::fixedView.width / 3, Constants::fixedView.top + Constants::fixedView.height*0.82f);
 }
 
 void Messages::Notice(std::string s)

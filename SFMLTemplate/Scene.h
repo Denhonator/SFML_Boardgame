@@ -24,6 +24,7 @@ public:
 	void EndTurn();
 	void UpdateState();
 	Board* GetBoard() { return &board; };
+	sf::Vector2i GetMouseTile() { return mouseTile; };
 	std::vector<sf::Sprite> ui;
 	std::vector<sf::Sprite> tiles;
 	std::vector<Unit> units;

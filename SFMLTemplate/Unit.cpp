@@ -3,7 +3,7 @@
 int Unit::unitCount = 0;
 std::vector<Unit>* Unit::unit;
 
-Unit::Unit(std::string name, int player, std::string nick)
+Unit::Unit(std::string name, int player, sf::Vector2i pos, std::string nick)
 {
 	unitCount++;
 	sprite.setTexture(*Resources::GetTexture("units/" + name + "/" + name));
@@ -15,10 +15,12 @@ Unit::Unit(std::string name, int player, std::string nick)
 	this->nick = nick;
 	XP = 0;
 	LoadFromFile("units/" + name + "/" + nick);
-	AddWeapon("self", 1);
+	if(weapons.size()==0)
+		AddWeapon("self", 1);
 	currentWeapon = 0;
 	id = unitCount;
-	tile = sf::Vector2i(0, 0);
+	tile = pos;
+	sprite.setPosition(tile.x*Constants::tileSize, tile.y*Constants::tileSize);
 	Tile::tileRef[tile.x][tile.y].unit = id;
 	bars = sf::VertexArray(sf::PrimitiveType::TriangleStrip, 18);
 	UpdateBonuses();
@@ -167,6 +169,7 @@ void Unit::AttackTo(sf::Vector2i pos)
 					if (a.fail)
 						Messages::Add("Critical failure");
 				}
+				UpdateBars();
 			}
 			else {
 				Messages::Notice("Invalid target");

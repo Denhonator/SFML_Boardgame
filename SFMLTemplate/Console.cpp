@@ -60,7 +60,7 @@ void Console::Command(Scene* scene)
 					player = std::stoi(std::string(args.at(2)));
 				if (args.size() > 3)
 					nick = args.at(3);
-				scene->AddUnit(&Unit(std::string(args.at(1)), player, nick));
+				scene->AddUnit(&Unit(std::string(args.at(1)), player, scene->GetMouseTile(), nick));
 				Messages::Notice("Unit added");
 			}
 			catch(const std::exception& e){

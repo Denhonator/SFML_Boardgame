@@ -1,9 +1,10 @@
-strength=4,10
-dexterity=4,10
+strength=6,10
+dexterity=6,10
 perception=4,10
 charisma=4,10
 willpower=4,15
 intelligence=4,15
 vitality=4,10
 luck=4,10
-weapon=sword,4
+weapon=self,1
+weapon=sword,1

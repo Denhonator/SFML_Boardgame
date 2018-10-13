@@ -2,7 +2,14 @@
 
 Scene::Scene()
 {
+	srand(time(NULL));
 	board.Randomize();
+	for (short i = 0; i < board.boardSize.x; i++) {
+		for (short j = 0; j < board.boardSize.y; j++) {
+			if (i + j > 6 && board.GetTile(i, j).sprite == "grass"&&board.GetTile(i, j).unit == -1 && rand() % 101 > 95)
+				AddUnit(&Unit("cave crab", 0, sf::Vector2i(i, j)));
+		}
+	}
 	const sf::Texture& bg = board.GetTexture(true)->getTexture();
 	AddTile(&sf::Sprite(bg));
 	ui.push_back(sf::Sprite(*Resources::GetTexture("ui/outline")));
@@ -166,7 +173,7 @@ void Scene::Click()
 		update = true;
 		return;
 	}
-	if(currentAction=="")
+	if(currentAction!="attack")
 		SetUnit(board.GetTile(mouseTile.x, mouseTile.y).unit);
 	
 	if (currentUnit != -1 && !Messages::prompting) {

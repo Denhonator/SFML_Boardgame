@@ -10,7 +10,7 @@
 class Unit
 {
 public:
-	Unit(std::string name, int player=0, std::string nick="");
+	Unit(std::string name, int player=0, sf::Vector2i pos=sf::Vector2i(0,0), std::string nick="");
 	~Unit();
 	static Unit* GetUnit(int id);
 	void LoadFromFile(std::string path);
