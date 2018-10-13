@@ -4,7 +4,6 @@
 #include "Time.h"
 #include "Board.h"
 #include "Unit.h"
-#include <random>
 
 class Scene
 {
@@ -32,6 +31,7 @@ public:
 	std::vector<unsigned int> drawTiles;
 	std::vector<unsigned int> drawUnits;
 private:
+	bool update;
 	Board board;
 	sf::Vector2i mouseTile;
 	std::vector<int> players;

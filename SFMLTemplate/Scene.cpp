@@ -2,13 +2,7 @@
 
 Scene::Scene()
 {
-	srand(time(NULL));
-	for (int i = 0; i < board.boardSize.x; i++) {
-		for (int j = 0; j < board.boardSize.y; j++) {
-			if(rand()%101>20)
-				board.InsertTile(i, j, Tile("grass"));
-		}
-	}
+	board.Randomize();
 	const sf::Texture& bg = board.GetTexture(true)->getTexture();
 	AddTile(&sf::Sprite(bg));
 	ui.push_back(sf::Sprite(*Resources::GetTexture("ui/outline")));
@@ -36,6 +30,8 @@ std::vector<sf::Sprite>* Scene::Update()
 		tiles.at(0).setTexture(board.GetTexture(board.refresh)->getTexture());
 		board.refresh = false;
 	}
+	if (update)
+		UpdateState();
 	return &tiles;
 }
 
@@ -101,9 +97,10 @@ Unit * Scene::FindUnit(int id)
 
 void Scene::SetUnit(int id)
 {
-	if (FindUnit(id)->player == currentPlayer) {
+	Unit* u = FindUnit(id);
+	if (u!=nullptr && FindUnit(id)->player == currentPlayer) {
 		currentUnit = id;
-		UpdateState();
+		update = true;
 	}
 }
 
@@ -113,7 +110,7 @@ void Scene::SetAction(std::string action)
 		currentAction = "";
 	else
 		currentAction = action;
-	UpdateState();
+	update = true;
 }
 
 void Scene::EndTurn()
@@ -132,11 +129,12 @@ void Scene::EndTurn()
 	}
 	currentUnit = -1;
 	currentAction = "";
-	UpdateState();
+	update = true;
 }
 
 void Scene::UpdateState()
 {
+	update = false;
 	players.clear();
 	for (int i = 0; i < units.size(); i++) {
 		if (units.at(i).Dead()) {
@@ -165,7 +163,7 @@ void Scene::Click()
 	if (mouseTile.x < 0) {
 		currentUnit = -1;
 		currentAction = "";
-		UpdateState();
+		update = true;
 		return;
 	}
 	if(currentAction=="")
@@ -182,7 +180,7 @@ void Scene::Click()
 	else {
 		SetAction("");
 	}
-	UpdateState();
+	update = true;
 }
 
 void Scene::KeyPress(sf::Keyboard::Key key)
@@ -207,5 +205,5 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 			SetAction("");
 		}
 	}
-	UpdateState();
+	update = true;
 }

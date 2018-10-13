@@ -4,6 +4,7 @@ sf::RenderTexture Board::rTex;
 
 Board::Board()
 {
+	srand(time(NULL));
 	tileSize = 30;
 	boardSize = sf::Vector2i(30,30);
 	refresh = true;
@@ -24,6 +25,35 @@ void Board::InsertTile(unsigned short x, unsigned short y, Tile tile)
 {
 	tiles[x][y] = tile;
 	Tile::tileRef[x] = &tiles[x][0];
+}
+
+void Board::MakeRoom(short x1, short x2, short y1, short y2, short chance)
+{
+	x2 = std::min((int)x2, boardSize.x);
+	y2 = std::min((int)y2, boardSize.y);
+	for (int i = x1; i <= x2; i++) {
+		for (int j = y1; j <= y2; j++) {
+			if(rand()%101<chance)
+				InsertTile(i, j, Tile("grass"));
+		}
+	}
+}
+
+void Board::Randomize()
+{
+	MakeRoom(0, 2, 0, 2, 100);	//Starting area
+
+	MakeRoom(0, boardSize.x-1, 0, 0, 50);	//Edges
+	MakeRoom(0, 0, 0, boardSize.y-1, 50);
+	MakeRoom(0, boardSize.x - 1, boardSize.y-1, boardSize.y-1, 50);
+	MakeRoom(boardSize.x-1, boardSize.x-1, 0, boardSize.y - 1, 50);
+
+	MakeRoom(0, boardSize.x - 1, 0, boardSize.y - 1, 35);	//All around
+	for (short i = 0; i < boardSize.x; i += 6) {
+		for (short j = 0; j < boardSize.y; j += 6) {
+			MakeRoom(i, i + 4, j, j + 4, 85);				//Rooms
+		}
+	}
 }
 
 void Board::SetTileSize(float size)
