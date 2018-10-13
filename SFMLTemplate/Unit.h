@@ -13,9 +13,11 @@ public:
 	Unit(std::string name, int player=0, sf::Vector2i pos=sf::Vector2i(0,0), std::string nick="");
 	~Unit();
 	static Unit* GetUnit(int id);
+	static short Distance(sf::Vector2i a, sf::Vector2i b);
 	void LoadFromFile(std::string path);
-	void MoveTo(sf::Vector2i pos);
-	void AttackTo(sf::Vector2i pos);
+	bool MoveTo(sf::Vector2i pos);
+	bool MoveTowards(sf::Vector2i pos);
+	bool AttackTo(sf::Vector2i pos);
 	void GetAttacked(Attack a);
 	void AddWeapon(std::string name, short level);
 	void SwitchWeapon(short i = -1);
@@ -31,6 +33,7 @@ public:
 	sf::Sprite sprite;
 	sf::VertexArray bars;
 	static std::vector<Unit>* unit;
+	bool removed = false;
 private:
 	static int unitCount;
 	std::string name;

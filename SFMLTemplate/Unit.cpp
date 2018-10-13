@@ -107,36 +107,59 @@ void Unit::UpdateBonuses()
 	charBonus = -10 + attribute["charisma"] * 4;
 }
 
-int Distance(sf::Vector2i a, sf::Vector2i b) {
+short Unit::Distance(sf::Vector2i a, sf::Vector2i b) {
 	return std::abs(a.x - b.x) + std::abs(a.y - b.y);
 }
 
-void Unit::MoveTo(sf::Vector2i pos)
+bool Unit::MoveTo(sf::Vector2i pos)
 {
+	pos = sf::Vector2i(std::min(std::max(pos.x, 0), Constants::boardSize - 1), std::min(std::max(pos.y, 0), Constants::boardSize - 1));
 	if (Tile::tileRef[pos.x][pos.y].sprite != "0" && Tile::tileRef[pos.x][pos.y].unit==-1) {
 		if (std::abs(tile.x - pos.x) < 2 && std::abs(tile.y - pos.y) < 2) {
 			if (Distance(pos, tile) == 2) {
 				if (AP >= 3)
 					AP -= 3;
 				else
-					return;
+					return false;
 			}
-			if (Distance(pos, tile) == 1) {
+			else if (Distance(pos, tile) == 1) {
 				if (AP >= 2)
 					AP -= 2;
 				else
-					return;
+					return false;
 			}
+			else
+				return false;
 			sprite.setPosition(sf::Vector2f(pos.x*Constants::tileSize, pos.y*Constants::tileSize));
 			Tile::tileRef[tile.x][tile.y].unit = -1;
 			tile = pos;
 			Tile::tileRef[tile.x][tile.y].unit = id;
 			UpdateBars();
+			return true;
 		}
 	}
+	return false;
 }
 
-void Unit::AttackTo(sf::Vector2i pos)
+bool Unit::MoveTowards(sf::Vector2i pos)
+{
+	sf::Vector2i dif = sf::Vector2i(pos.x-tile.x, pos.y-tile.y);
+	if (dif.x > 0)
+		dif.x = 1;
+	if (dif.x < 0)
+		dif.x = -1;
+	if (dif.y > 0)
+		dif.y = 1;
+	if (dif.y < 0)
+		dif.y = -1;
+	for (short i = 0; i < Resources::voffs.size();i++) {
+		if (MoveTo(tile + dif + Resources::voffs.at(i)))
+			return true;
+	}
+	return false;
+}
+
+bool Unit::AttackTo(sf::Vector2i pos)
 {
 	if (weapons.at(currentWeapon).CanUse(attribute)) {
 		Attack a = weapons.at(currentWeapon).GetAttack();
@@ -155,7 +178,7 @@ void Unit::AttackTo(sf::Vector2i pos)
 						if (key == sf::Keyboard::Key::Y)
 							break;
 						else if (key != sf::Keyboard::Key::Unknown)
-							return;
+							return false;
 					}
 				}
 
@@ -170,6 +193,7 @@ void Unit::AttackTo(sf::Vector2i pos)
 						Messages::Add("Critical failure");
 				}
 				UpdateBars();
+				return true;
 			}
 			else {
 				Messages::Notice("Invalid target");
@@ -179,6 +203,7 @@ void Unit::AttackTo(sf::Vector2i pos)
 	else {
 		Messages::Notice("Unable to use current weapon");
 	}
+	return false;
 }
 
 void Unit::GetAttacked(Attack a)

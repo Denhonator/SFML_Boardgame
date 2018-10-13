@@ -5,6 +5,7 @@ std::map<std::string, sf::Font> Resources::font = {};
 std::map<std::string, sf::SoundBuffer> Resources::sound;
 std::vector<sf::Sound> Resources::player;
 short Resources::roll = 0;
+std::vector <sf::Vector2i> Resources::voffs = {sf::Vector2i(0,0),sf::Vector2i(-1,0) ,sf::Vector2i(0,-1) ,sf::Vector2i(1,0) ,sf::Vector2i(0,1) ,sf::Vector2i(1,1) ,sf::Vector2i(-1,-1) ,sf::Vector2i(1,-1) ,sf::Vector2i(-1,1) };
 
 void Resources::RollerFunction() {
 	srand(time(NULL));

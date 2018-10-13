@@ -29,10 +29,90 @@ Scene::Scene()
 
 Scene::~Scene()
 {
+	if (AI.joinable())
+		AI.join();
+}
+
+void Scene::AITurn()
+{
+	short temp = aiUnit;
+	for (short i = aiUnit + 1; i < units.size(); i++) {
+		if (units.at(i).player == 0 && !units.at(i).Dead()) {
+			aiUnit = i;
+			break;
+		}
+	}
+	if (temp == aiUnit) {
+		aiUnit = -1;
+		EndTurn();
+	}
+	else {
+		short index = AIFindTarget();
+		if (index == -1) {
+			AIReady = true;
+			return;
+		}
+		short dist = Unit::Distance(units.at(aiUnit).tile, units.at(index).tile);
+
+		if (index != -1 && dist < 8 && dist > 1) {
+			for (short i = 0; i < 5; i++) {
+				if (units.at(aiUnit).MoveTowards(units.at(index).tile))
+					sf::sleep(sf::milliseconds(300));
+				if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) < 2) {
+					break;
+				}
+			}
+		}
+
+		if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) < 2) {
+			while (units.at(aiUnit).AttackTo(units.at(index).tile)) {
+				sf::sleep(sf::milliseconds(300));
+				if (units.at(index).Dead()) {
+					index = AIFindTarget();
+					if (index == -1) {
+						AIReady = true;
+						return;
+					}
+				}
+			}
+		}
+	}
+	AIReady = true;
+}
+
+short Scene::AIFindTarget()
+{
+	short dist = 100;
+	short index = -1;
+	for (short i = 0; i < units.size(); i++) {
+		if (units.at(i).player == 0)
+			continue;
+		short newDist = Unit::Distance(units.at(aiUnit).tile, units.at(i).tile);
+		if (newDist < dist && !units.at(i).Dead()) {
+			dist = newDist;
+			index = i;
+		}
+	}
+	return index;
 }
 
 std::vector<sf::Sprite>* Scene::Update()
 {
+	if (currentPlayer == 0 && players.size()>1) {
+		if (aiUnit == -1) {
+			AIReady = false;
+			AI = std::thread(&Scene::AITurn, this);
+		}
+		if (AIReady) {
+			AI.join();
+			AIReady = false;
+			AI = std::thread(&Scene::AITurn, this);
+		}
+	}
+	else if (AIReady) {
+		AI.join();
+		AIReady = false;
+	}
 	if (board.refresh) {
 		tiles.at(0).setTexture(board.GetTexture(board.refresh)->getTexture());
 		board.refresh = false;
@@ -69,6 +149,7 @@ void Scene::RemoveUnit(unsigned short i)
 		currentAction = "";
 	}
 	Tile::tileRef[units.at(i).tile.x][units.at(i).tile.y].unit = -1;
+	units.at(i).removed = true;
 	//units.erase(units.begin() + i);
 }
 
@@ -86,7 +167,6 @@ void Scene::MouseHover(sf::Vector2i pos)
 		texts.at(5).setString(board.GetTile(mouseTile.x, mouseTile.y).Print());
 		Unit* u = Unit::GetUnit(board.GetTile(mouseTile.x,mouseTile.y).unit);
 		texts.at(6).setString(u != nullptr ? u->Print() : "");
-		//printf("%d, %d\n", mouseTile.x, mouseTile.y);
 	}
 }
 
@@ -142,15 +222,23 @@ void Scene::EndTurn()
 void Scene::UpdateState()
 {
 	update = false;
+	short index = -1;
+	for (short i = 0; i < players.size(); i++) {
+		if (players.at(i) == currentPlayer) {
+			index = i;
+		}
+	}
 	players.clear();
 	for (int i = 0; i < units.size(); i++) {
 		if (units.at(i).Dead()) {
-			RemoveUnit(i);
+			if(!units.at(i).removed)
+				RemoveUnit(i);
 		}
 		else if (std::find(players.begin(), players.end(), units.at(i).player) == players.end()) {
 			players.push_back(units.at(i).player);
 		}
 	}
+	currentPlayer = players.at(index < players.size() ? index : index - 1);
 	Tile t = board.GetTile(mouseTile.x, mouseTile.y);
 	texts.at(0).setString("Current player: " + std::to_string(currentPlayer));
 	texts.at(1).setString(currentUnit != -1 ? FindUnit(currentUnit)->Print(true) : "");
@@ -192,7 +280,7 @@ void Scene::Click()
 
 void Scene::KeyPress(sf::Keyboard::Key key)
 {
-	if (key == sf::Keyboard::E) {
+	if (key == sf::Keyboard::E && currentPlayer!=0) {
 		EndTurn();
 	}
 	if (currentUnit != -1 && !Messages::prompting) {

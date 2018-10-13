@@ -32,7 +32,12 @@ public:
 	std::vector<unsigned int> drawTiles;
 	std::vector<unsigned int> drawUnits;
 private:
+	std::thread AI;
+	void AITurn();
+	short AIFindTarget();
+	bool AIReady;
 	bool update;
+	short aiUnit = -1;
 	Board board;
 	sf::Vector2i mouseTile;
 	std::vector<int> players;
