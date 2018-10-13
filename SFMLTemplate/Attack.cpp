@@ -17,5 +17,4 @@ Attack::~Attack()
 void Attack::Roll()
 {
 	roll = Resources::Roll();
-	successful = roll >= successThreshold;
 }

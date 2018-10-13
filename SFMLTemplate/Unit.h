@@ -20,9 +20,10 @@ public:
 	void AddWeapon(std::string name, short level);
 	void SwitchWeapon(short i = -1);
 	Weapon* GetWeapon(short i = -1);
+	void UpdateBonuses();
 	bool Dead() { return HP <= 0; };
 	void EndOfTurn();
-	std::string Print();
+	std::string Print(bool full = false);
 	void UpdateBars();
 	int player;
 	int id;
@@ -38,6 +39,7 @@ private:
 	short maxHP, HP;
 	short maxMP, MP;
 	short XP;
+	short tohit, tocast, criticalHit, criticalFail, luckBonus, charBonus;
 	short currentWeapon;
 	std::vector<Weapon> weapons;
 	std::map<std::string, short> attribute;

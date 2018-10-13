@@ -146,11 +146,12 @@ void Scene::UpdateState()
 			players.push_back(units.at(i).player);
 		}
 	}
+	Tile t = board.GetTile(mouseTile.x, mouseTile.y);
 	texts.at(0).setString("Current player: " + std::to_string(currentPlayer));
-	texts.at(1).setString(currentUnit != -1 ? FindUnit(currentUnit)->Print() : "");
+	texts.at(1).setString(currentUnit != -1 ? FindUnit(currentUnit)->Print(true) : "");
 	texts.at(2).setString(currentUnit != -1 ? "Action: " + currentAction : "");
-	texts.at(5).setString(board.GetTile(mouseTile.x, mouseTile.y).Print());
-	Unit* u = Unit::GetUnit(board.GetTile(mouseTile.x, mouseTile.y).unit);
+	texts.at(5).setString(t.Print());
+	Unit* u = Unit::GetUnit(t.unit);
 	texts.at(6).setString(u != nullptr ? u->Print() : "");
 	for (int i = 0; i < 9; i++) {
 		if (i == 4)

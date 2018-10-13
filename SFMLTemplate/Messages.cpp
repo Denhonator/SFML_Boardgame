@@ -14,7 +14,7 @@ Messages::Messages()
 	log = sf::Text("", *Resources::GetFont("default.ttf"));
 	notice = sf::Text("", *Resources::GetFont("default.ttf"));
 	prompt = sf::Text("", *Resources::GetFont("default.ttf"));
-	prompt.setScale(sf::Vector2f(1.5f, 1.5f));
+	prompt.setScale(sf::Vector2f(1.75f, 1.75f));
 	prompt.setOutlineThickness(2);
 }
 

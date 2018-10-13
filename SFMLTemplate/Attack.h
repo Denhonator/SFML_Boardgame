@@ -12,6 +12,6 @@ public:
 	short range, ap, mp;
 	short roll;
 	short successThreshold;
-	bool successful;
+	bool crit, fail;
 };
 

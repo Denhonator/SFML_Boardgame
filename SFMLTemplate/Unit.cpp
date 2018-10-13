@@ -15,18 +15,16 @@ Unit::Unit(std::string name, int player, std::string nick)
 	this->nick = nick;
 	XP = 0;
 	LoadFromFile("units/" + name + "/" + nick);
-	maxAP = 14+attribute["dexterity"];
-	maxHP = 3*attribute["vitality"];
-	maxMP = 3 * attribute["intelligence"];
-	AP = maxAP;
-	HP = maxHP;
-	MP = maxMP;
 	AddWeapon("self", 1);
 	currentWeapon = 0;
 	id = unitCount;
 	tile = sf::Vector2i(0, 0);
 	Tile::tileRef[tile.x][tile.y].unit = id;
-	bars = sf::VertexArray(sf::PrimitiveType::TriangleStrip, 8);
+	bars = sf::VertexArray(sf::PrimitiveType::TriangleStrip, 18);
+	UpdateBonuses();
+	AP = maxAP;
+	HP = maxHP;
+	MP = maxMP;
 	UpdateBars();
 }
 
@@ -94,6 +92,19 @@ Weapon * Unit::GetWeapon(short i)
 	return &weapons.at(i);
 }
 
+void Unit::UpdateBonuses()
+{
+	maxAP = 8 + attribute["dexterity"];
+	maxHP = 3 * attribute["vitality"];
+	maxMP = 3 * attribute["intelligence"];
+	tohit = -24 + attribute["dexterity"] * 3;
+	tocast = -24 + attribute["willpower"] * 3;
+	criticalHit = 12 - attribute["perception"] * 2;
+	criticalFail = 10 - attribute["perception"];
+	luckBonus = -8 + attribute["luck"];
+	charBonus = -10 + attribute["charisma"] * 4;
+}
+
 int Distance(sf::Vector2i a, sf::Vector2i b) {
 	return std::abs(a.x - b.x) + std::abs(a.y - b.y);
 }
@@ -127,21 +138,35 @@ void Unit::AttackTo(sf::Vector2i pos)
 {
 	if (weapons.at(currentWeapon).CanUse(attribute)) {
 		Attack a = weapons.at(currentWeapon).GetAttack();
+		a.fail = a.roll <= 5 + criticalFail;
+		a.crit = a.roll >= 95 + criticalHit;
 		if (AP >= a.ap && Distance(tile, pos) <= a.range) {
 			Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
 			if (target != nullptr) {
-				Messages::Prompt("Attack friendly unit " + target->nick + "?");
-				while (target->player==player) {
-					sf::sleep(sf::milliseconds(2));
-					sf::Keyboard::Key key = Messages::WaitInput();
-					if (key == sf::Keyboard::Key::Y)
-						break;
-					else if (key != sf::Keyboard::Key::Unknown)
-						return;
+
+				if(target->player == player){
+					a.roll += charBonus;
+					Messages::Prompt("Attack friendly unit " + target->nick + "?");
+					while (1) {
+						sf::sleep(sf::milliseconds(2));
+						sf::Keyboard::Key key = Messages::WaitInput();
+						if (key == sf::Keyboard::Key::Y)
+							break;
+						else if (key != sf::Keyboard::Key::Unknown)
+							return;
+					}
 				}
+
+				a.roll += tohit;
 				AP -= a.ap;
 				Messages::Add(name + " rolls " + std::to_string(a.roll) + "/" + std::to_string(a.successThreshold) + " on " + a.name + " against " + target->nick);
-				target->GetAttacked(a);
+				if(a.roll>=a.successThreshold&&!a.fail)
+					target->GetAttacked(a);
+				else {
+					Resources::PlayWav("woosh");
+					if (a.fail)
+						Messages::Add("Critical failure");
+				}
 			}
 			else {
 				Messages::Notice("Invalid target");
@@ -155,36 +180,47 @@ void Unit::AttackTo(sf::Vector2i pos)
 
 void Unit::GetAttacked(Attack a)
 {
-	if (a.successful) {
-		HP -= a.damage.physical;
-		UpdateBars();
-		Resources::PlayWav("hit");
-		Messages::Add(name + " takes " + std::to_string(a.damage.physical) + " damage");
-	}
-	else {
-		Resources::PlayWav("woosh");
-	}
+	short mult = a.crit ? 2 : 1;
+	HP -= a.damage.physical * mult;
+	HP -= a.damage.fire * mult;
+	HP -= a.damage.ice * mult;
+	HP -= a.damage.lightning * mult;
+	UpdateBars();
+	Resources::PlayWav("hit");
+	if(a.crit)
+		Messages::Add("Critical hit!");
+	Messages::Add(name + " takes " + std::to_string(a.damage.physical) + " damage");
 }
 
 void Unit::EndOfTurn()
 {
 	AP = maxAP;
+	UpdateBars();
 }
 
-std::string Unit::Print()
+std::string Unit::Print(bool full)
 {
+	if (full) {
+		return nick + " (ID: " + std::to_string(id) + ")" +
+			"\nHP: " + std::to_string(HP) + "/" + std::to_string(maxHP) +
+			"\nAP: " + std::to_string(AP) + "/" + std::to_string(maxAP) +
+			"\nMP: " + std::to_string(MP) + "/" + std::to_string(maxMP) +
+			"\n" + weapons.at(currentWeapon).Print() +
+			"\nTo hit bonus: " + std::to_string(tohit) +
+			"\nCrit chance: " + std::to_string(100-(95+criticalHit)) + "%" +
+			"\nFail chance: " + std::to_string(5+criticalFail) + "%";
+	}
 	return nick + " (ID: " + std::to_string(id) + ")" +
 		"\nHP: " + std::to_string(HP) + "/" + std::to_string(maxHP) +
 		"\nAP: " + std::to_string(AP) + "/" + std::to_string(maxAP) +
-		"\nMP: " + std::to_string(MP) + "/" + std::to_string(maxMP) +
-		"\n" + weapons.at(currentWeapon).Print();
+		"\nMP: " + std::to_string(MP) + "/" + std::to_string(maxMP);
 }
 
 void Unit::UpdateBars()
 {
-	float width = Constants::tileSize / 30;
+	float width = Constants::tileSize / 40;
 	float heigth = Constants::tileSize*std::pow(maxHP/30.0f,1.0f);
-	sf::Vector2f offset = sf::Vector2f(2, Constants::tileSize / 2 - heigth / 2);
+	sf::Vector2f offset = sf::Vector2f(4, Constants::tileSize / 2 - heigth / 2);
 	float line = heigth * (1.0f-((float)HP / (float)maxHP));
 	bars[0].position = sprite.getPosition() + offset;
 	bars[1].position = sprite.getPosition() + offset + sf::Vector2f(width, 0);
@@ -194,8 +230,29 @@ void Unit::UpdateBars()
 	bars[5].position = sprite.getPosition() + offset + sf::Vector2f(width, line);
 	bars[6].position = sprite.getPosition() + offset + sf::Vector2f(0, heigth);
 	bars[7].position = sprite.getPosition() + offset + sf::Vector2f(width, heigth);
+	heigth = Constants::tileSize*std::pow(maxAP / 25.0f, 1.0f);
+	offset = sf::Vector2f(5+width, Constants::tileSize / 2 - heigth / 2);
+	line = heigth * (1.0f - ((float)AP / (float)maxAP));
+	bars[8].position = bars[7].position;
+	bars[9].position = sprite.getPosition() + offset;
+	bars[10].position = sprite.getPosition() + offset;
+	bars[11].position = sprite.getPosition() + offset + sf::Vector2f(width, 0);
+	bars[12].position = sprite.getPosition() + offset + sf::Vector2f(0, line);
+	bars[13].position = sprite.getPosition() + offset + sf::Vector2f(width, line);
+	bars[14].position = sprite.getPosition() + offset + sf::Vector2f(0, line);
+	bars[15].position = sprite.getPosition() + offset + sf::Vector2f(width, line);
+	bars[16].position = sprite.getPosition() + offset + sf::Vector2f(0, heigth);
+	bars[17].position = sprite.getPosition() + offset + sf::Vector2f(width, heigth);
+
 	for (short i = 0; i < 8; i++) {
 		bars[i].color = sf::Color(i<4?0:200, 0, 0, 255);
+	}
+	for (short i = 8; i < 10; i++) {
+		bars[i].color = sf::Color(0, 0, 0, 0);
+	}
+	for (short i = 10; i < 18; i++) {
+		short mult = i < 14 ? 0 : 1;
+		bars[i].color = sf::Color(255*mult, 255*mult, 200*mult, 255);
 	}
 }
 
