@@ -1,7 +1,8 @@
 #include "Weapon.h"
 
-Weapon::Weapon(std::string name, short level)
+Weapon::Weapon(std::string name, short level, short owner)
 {
+	this->owner = owner;
 	this->level = level;
 	this->name = name;
 	baseDamage = level + 1;
@@ -16,7 +17,7 @@ Weapon::Weapon(std::string name, short level)
 			}
 			else {
 				short damage = (baseDamage * std::stoi(temp.second.at(1))) / 100;
-				attacks.push_back(Attack(temp.first, std::stoi(temp.second.at(0)), Damage{ damage,0,0,0 }, 1, 5, 0));
+				attacks.push_back(Attack(owner, temp.first, std::stoi(temp.second.at(0)), Damage{ damage,0,0,0 }, 1, 5, 0));
 			}
 		}
 	}

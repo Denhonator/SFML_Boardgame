@@ -19,7 +19,7 @@ Scene::Scene()
 		texts.at(i).setPosition(sf::Vector2f(i>4 ? 2100 : 0, i%5 * 200));
 	}
 	mouseTile = sf::Vector2i(0, 0);
-	AddUnit(&Unit("swordguy", 1));
+	AddUnit(&Unit("swordguy", 1, sf::Vector2i(0,0),"denho"));
 	currentPlayer = 1;
 	currentUnit = -1;
 	currentAction = "";

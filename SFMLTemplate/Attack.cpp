@@ -1,9 +1,10 @@
 #include "Attack.h"
 
-Attack::Attack(std::string name, short chancetohit, Damage d, short range, short ap, short mp)
+Attack::Attack(short attacker, std::string name, short chancetohit, Damage d, short range, short ap, short mp)
 {
 	this->name = name;
 	this->range = range;
+	this->attacker = attacker;
 	damage = d;
 	this->ap = ap;
 	successThreshold = 100 - chancetohit;

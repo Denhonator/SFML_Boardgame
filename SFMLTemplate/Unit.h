@@ -1,6 +1,4 @@
 #pragma once
-#include <SFML/Graphics.hpp>
-#include <string>
 #include "Resources.h"
 #include "Constants.h"
 #include "Tile.h"
@@ -36,7 +34,7 @@ public:
 	static std::vector<Unit>* unit;
 	bool removed = false;
 private:
-	bool pushed = false;
+	int pushedBy = -1;
 	static int unitCount;
 	std::string name;
 	std::string nick;

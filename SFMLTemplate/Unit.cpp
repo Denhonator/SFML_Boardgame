@@ -64,7 +64,7 @@ void Unit::LoadFromFile(std::string path)
 
 void Unit::AddWeapon(std::string name, short level)
 {
-	weapons.push_back(Weapon(name, level));
+	weapons.push_back(Weapon(name, level, id));
 }
 
 void Unit::SwitchWeapon(short i)
@@ -157,11 +157,9 @@ bool Unit::MoveTowards(sf::Vector2i pos)
 		if (MoveTo(tile + dif + voffs.at(i)))
 			return true;
 	}
-	if (!pushed) {
-		for (short i = 0; i < voffs.size(); i++) {
-			if (Push(tile + dif + voffs.at(i)))
-				return true;
-		}
+	for (short i = 0; i < voffs.size(); i++) {
+		if (Push(tile + dif + voffs.at(i)))
+			return true;
 	}
 	return false;
 }
@@ -217,12 +215,12 @@ bool Unit::Push(sf::Vector2i pos)
 {
 	if (pos == tile || pos.x<0 || pos.y<0 ||pos.x>Constants::boardSize||pos.y>Constants::boardSize)
 		return false;
-	Attack a = Attack("push", 95, Damage{ 0,0,0,0 }, 1, 4, 0);
+	Attack a = Attack(id, "push", 95, Damage{ 0,0,0,0 }, 1, 4, 0);
 	a.Roll();
 	a.knockback = pos - tile;
 	if (AP >= a.ap) {
 		Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
-		if (target != nullptr && target->player==player) {
+		if (target != nullptr && target->player==player && target->id!=pushedBy) {
 			AP -= a.ap;
 			if(a.roll>=a.successThreshold)
 				target->GetAttacked(a);
@@ -242,7 +240,7 @@ void Unit::GetAttacked(Attack a)
 	HP -= a.damage.lightning * mult;
 	if (a.knockback.x || a.knockback.y) {
 		MoveTo(tile + a.knockback, 0);
-		pushed = true;
+		pushedBy = a.attacker;
 	}
 	if (HP < temp) {
 		Resources::PlayWav("hit");
@@ -256,7 +254,6 @@ void Unit::GetAttacked(Attack a)
 void Unit::EndOfTurn()
 {
 	AP = maxAP;
-	pushed = false;
 	UpdateBars();
 }
 

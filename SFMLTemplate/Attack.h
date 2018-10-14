@@ -4,10 +4,11 @@
 class Attack
 {
 public:
-	Attack(std::string name, short chancetohit, Damage d, short range, short ap, short mp);
+	Attack(short attacker, std::string name, short chancetohit, Damage d, short range, short ap, short mp);
 	~Attack();
 	void Roll();
 	std::string name;
+	short attacker;
 	Damage damage;
 	short range, ap, mp;
 	short roll;
