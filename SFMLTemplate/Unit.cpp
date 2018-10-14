@@ -111,20 +111,20 @@ short Unit::Distance(sf::Vector2i a, sf::Vector2i b) {
 	return std::abs(a.x - b.x) + std::abs(a.y - b.y);
 }
 
-bool Unit::MoveTo(sf::Vector2i pos)
+bool Unit::MoveTo(sf::Vector2i pos, short ap)
 {
 	pos = sf::Vector2i(std::min(std::max(pos.x, 0), Constants::boardSize - 1), std::min(std::max(pos.y, 0), Constants::boardSize - 1));
 	if (Tile::tileRef[pos.x][pos.y].sprite != "0" && Tile::tileRef[pos.x][pos.y].unit==-1) {
 		if (std::abs(tile.x - pos.x) < 2 && std::abs(tile.y - pos.y) < 2) {
 			if (Distance(pos, tile) == 2) {
-				if (AP >= 3)
-					AP -= 3;
+				if (AP >= ap*1.5f)
+					AP -= ap*1.5f;
 				else
 					return false;
 			}
 			else if (Distance(pos, tile) == 1) {
-				if (AP >= 2)
-					AP -= 2;
+				if (AP >= ap)
+					AP -= ap;
 				else
 					return false;
 			}
@@ -152,9 +152,16 @@ bool Unit::MoveTowards(sf::Vector2i pos)
 		dif.y = 1;
 	if (dif.y < 0)
 		dif.y = -1;
-	for (short i = 0; i < Resources::voffs.size();i++) {
-		if (MoveTo(tile + dif + Resources::voffs.at(i)))
+	std::vector<sf::Vector2i> voffs = Resources::Voffs();
+	for (short i = 0; i < voffs.size();i++) {
+		if (MoveTo(tile + dif + voffs.at(i)))
 			return true;
+	}
+	if (!pushed) {
+		for (short i = 0; i < voffs.size(); i++) {
+			if (Push(tile + dif + voffs.at(i)))
+				return true;
+		}
 	}
 	return false;
 }
@@ -169,7 +176,7 @@ bool Unit::AttackTo(sf::Vector2i pos)
 			Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
 			if (target != nullptr) {
 
-				if(target->player == player){
+				if(target->player == player && player!=0){
 					a.roll += charBonus;
 					Messages::Prompt("Attack friendly unit " + target->nick + "?");
 					while (1) {
@@ -206,23 +213,50 @@ bool Unit::AttackTo(sf::Vector2i pos)
 	return false;
 }
 
+bool Unit::Push(sf::Vector2i pos)
+{
+	if (pos == tile || pos.x<0 || pos.y<0 ||pos.x>Constants::boardSize||pos.y>Constants::boardSize)
+		return false;
+	Attack a = Attack("push", 95, Damage{ 0,0,0,0 }, 1, 4, 0);
+	a.Roll();
+	a.knockback = pos - tile;
+	if (AP >= a.ap) {
+		Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
+		if (target != nullptr && target->player==player) {
+			AP -= a.ap;
+			if(a.roll>=a.successThreshold)
+				target->GetAttacked(a);
+			return true;
+		}
+	}
+	return false;
+}
+
 void Unit::GetAttacked(Attack a)
 {
 	short mult = a.crit ? 2 : 1;
+	short temp = HP;
 	HP -= a.damage.physical * mult;
 	HP -= a.damage.fire * mult;
 	HP -= a.damage.ice * mult;
 	HP -= a.damage.lightning * mult;
+	if (a.knockback.x || a.knockback.y) {
+		MoveTo(tile + a.knockback, 0);
+		pushed = true;
+	}
+	if (HP < temp) {
+		Resources::PlayWav("hit");
+		if (a.crit)
+			Messages::Add("Critical hit!");
+		Messages::Add(name + " takes " + std::to_string(a.damage.physical) + " damage");
+	}
 	UpdateBars();
-	Resources::PlayWav("hit");
-	if(a.crit)
-		Messages::Add("Critical hit!");
-	Messages::Add(name + " takes " + std::to_string(a.damage.physical) + " damage");
 }
 
 void Unit::EndOfTurn()
 {
 	AP = maxAP;
+	pushed = false;
 	UpdateBars();
 }
 

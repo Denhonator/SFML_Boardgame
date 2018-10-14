@@ -144,3 +144,17 @@ short Resources::Roll()
 {
 	return roll;
 }
+
+std::vector<sf::Vector2i> Resources::Voffs()
+{
+	std::vector<sf::Vector2i> t = voffs;
+	std::vector<sf::Vector2i> r;
+	r.push_back(t.at(0));
+	t.erase(t.begin());
+	while (t.size() > 0) {
+		short x = roll % t.size();
+		r.push_back(t.at(x));
+		t.erase(t.begin() + x);
+	}
+	return r;
+}

@@ -21,7 +21,7 @@ public:
 	static std::pair<std::string, std::vector<std::string>> KeyWithStrings(std::string line);
 	static bool StrInVector(std::string s, std::vector<std::string> v);
 	static short Roll();
-	static std::vector <sf::Vector2i> voffs;
+	static std::vector <sf::Vector2i> Voffs();
 private:
 	void RollerFunction();
 	static std::map<std::string, sf::Texture> tile;
@@ -31,6 +31,7 @@ private:
 	static short roll;
 	std::thread roller;
 	bool running;
+	static std::vector <sf::Vector2i> voffs;
 };
 
 struct Damage {

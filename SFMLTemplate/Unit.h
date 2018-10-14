@@ -15,9 +15,10 @@ public:
 	static Unit* GetUnit(int id);
 	static short Distance(sf::Vector2i a, sf::Vector2i b);
 	void LoadFromFile(std::string path);
-	bool MoveTo(sf::Vector2i pos);
+	bool MoveTo(sf::Vector2i pos, short ap = 3);
 	bool MoveTowards(sf::Vector2i pos);
 	bool AttackTo(sf::Vector2i pos);
+	bool Push(sf::Vector2i pos);
 	void GetAttacked(Attack a);
 	void AddWeapon(std::string name, short level);
 	void SwitchWeapon(short i = -1);
@@ -35,6 +36,7 @@ public:
 	static std::vector<Unit>* unit;
 	bool removed = false;
 private:
+	bool pushed = false;
 	static int unitCount;
 	std::string name;
 	std::string nick;

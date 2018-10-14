@@ -13,5 +13,6 @@ public:
 	short roll;
 	short successThreshold;
 	bool crit, fail;
+	sf::Vector2i knockback;
 };
 

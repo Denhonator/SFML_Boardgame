@@ -8,6 +8,7 @@ Attack::Attack(std::string name, short chancetohit, Damage d, short range, short
 	this->ap = ap;
 	successThreshold = 100 - chancetohit;
 	roll = -1;
+	knockback = sf::Vector2i(0, 0);
 }
 
 Attack::~Attack()
