@@ -12,19 +12,23 @@ public:
 	~Unit();
 	static Unit* GetUnit(int id);
 	static short Distance(sf::Vector2i a, sf::Vector2i b);
+	static bool TransferWeapon(Unit* from, Unit* to, short index);
 	void LoadFromFile(std::string path);
 	bool MoveTo(sf::Vector2i pos, short ap = 3);
 	bool MoveTowards(sf::Vector2i pos);
+	bool LootFrom(sf::Vector2i pos);
+	bool LootFrom(Unit* unit);
 	bool AttackTo(sf::Vector2i pos);
 	bool Push(sf::Vector2i pos);
 	void GetAttacked(Attack a);
 	void AddWeapon(std::string name, short level);
-	void SwitchWeapon(short i = -1);
+	bool SwitchWeapon(short i = -1);
 	Weapon* GetWeapon(short i = -1);
 	void UpdateBonuses();
 	bool Dead() { return HP <= 0; };
 	void EndOfTurn();
-	std::string Print(bool full = false);
+	std::string Print(bool full = false, bool justName = false);
+	std::string PrintLootable();
 	void UpdateBars();
 	int player;
 	int id;
@@ -34,10 +38,10 @@ public:
 	static std::vector<Unit>* unit;
 	bool removed = false;
 private:
+	Unit* ChooseBodyFrom(sf::Vector2i pos);
 	int pushedBy = -1;
 	static int unitCount;
-	std::string name;
-	std::string nick;
+	std::string name, nick;
 	short maxAP, AP;
 	short maxHP, HP;
 	short maxMP, MP;

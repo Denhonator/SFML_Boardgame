@@ -56,7 +56,7 @@ void Main::Events()
 				if (keyThread.joinable() && !Messages::prompting)
 					keyThread.join();
 				if (keyThread.joinable()&&Messages::prompting) {
-					Messages::SetInput(event.key.code);
+					;
 				}
 				else
 					keyThread = std::thread(&Scene::KeyPress, &mainScene, event.key.code);
@@ -66,6 +66,9 @@ void Main::Events()
 		if (event.type == sf::Event::TextEntered) {
 			if (Console::enable) {
 				Console::Write(event.text.unicode);
+			}
+			if (keyThread.joinable() && Messages::prompting) {
+				Messages::SetInput(static_cast<char>(event.text.unicode));
 			}
 		}
 

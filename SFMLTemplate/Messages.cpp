@@ -6,7 +6,7 @@ sf::Text Messages::prompt;
 std::vector<std::string> Messages::texts;
 float Messages::fade = 0;
 bool Messages::prompting = false;
-sf::Keyboard::Key Messages::key = sf::Keyboard::Key::Unknown;
+char Messages::c = 0;
 sf::Vector2f Messages::promptClick;
 
 Messages::Messages()
@@ -54,28 +54,34 @@ void Messages::FadeNotice(float f)
 	}
 }
 
-void Messages::Prompt(std::string s)
+char Messages::Prompt(std::string s)
 {
-	key = sf::Keyboard::Key::Unknown;
+	c = 0;
 	prompt.setString(s!=""?s:"Prompt without text");
 	prompt.setPosition(Constants::fixedView.left + Constants::fixedView.width / 3, Constants::fixedView.height / 3);
 	prompting = true;
+	while (1) {
+		sf::sleep(sf::milliseconds(2));
+		char key = Messages::WaitInput();
+		if (key != 0)
+			return key;
+	}
 }
 
-sf::Keyboard::Key Messages::WaitInput()
+char Messages::WaitInput()
 {
-	if (key != sf::Keyboard::Key::Unknown) {
-		sf::Keyboard::Key temp = key;
-		key = sf::Keyboard::Key::Unknown;
+	if (c != 0) {
+		char temp = c;
+		c = 0;
 		prompting = false;
 		return temp;
 	}
-	return sf::Keyboard::Key::Unknown;
+	return 0;
 }
 
-void Messages::SetInput(sf::Keyboard::Key k)
+void Messages::SetInput(char c)
 {
-	key = k;
+	Messages::c = c;
 }
 
 void Messages::Click(sf::Vector2f pos)

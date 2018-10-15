@@ -27,9 +27,23 @@ Weapon::~Weapon()
 {
 }
 
-std::string Weapon::Print()
+std::string Weapon::Print(bool full, bool justName)
 {
-	return name + " lvl " + std::to_string(level) + "\n" +
+	std::string buffer = name + " lvl " + std::to_string(level);
+	if (justName)
+		return buffer;
+	if (full) {
+		for (short i = 0; i < attacks.size(); i++) {
+			buffer += "\n" + attacks.at(i).name + " " +
+				std::to_string(100 - attacks.at(i).successThreshold) + "% " +
+				std::to_string(attacks.at(i).damage.physical) + "," +
+				std::to_string(attacks.at(i).damage.fire) + "," +
+				std::to_string(attacks.at(i).damage.ice) + "," +
+				std::to_string(attacks.at(i).damage.lightning);
+		}
+		return buffer;
+	}
+	return buffer + "\n" +
 		attacks.at(currentAttack).name + " " +
 		std::to_string(100-attacks.at(currentAttack).successThreshold)+"% " +
 		std::to_string(attacks.at(currentAttack).damage.physical) + "," +

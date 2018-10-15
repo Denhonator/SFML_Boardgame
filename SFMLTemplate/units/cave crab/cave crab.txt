@@ -7,3 +7,4 @@ intelligence=1,15
 vitality=1,10
 luck=1,10
 weapon=claws,1
+weapon=sword,1

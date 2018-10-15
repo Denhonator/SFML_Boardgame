@@ -6,7 +6,7 @@ class Weapon
 public:
 	Weapon(std::string name, short level, short owner);
 	~Weapon();
-	std::string Print();
+	std::string Print(bool full = false, bool justName = false);
 	void SwitchAttack(short i = -1);
 	Attack GetAttack(short i = -1);
 	bool CanUse(std::map<std::string, short> attributes);

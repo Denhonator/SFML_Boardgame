@@ -67,14 +67,14 @@ void Unit::AddWeapon(std::string name, short level)
 	weapons.push_back(Weapon(name, level, id));
 }
 
-void Unit::SwitchWeapon(short i)
+bool Unit::SwitchWeapon(short i)
 {
 	if (AP < 2 || weapons.size()==1) {
 		if (AP < 2)
 			Messages::Notice("Not enough AP to switch weapon");
 		else
 			Messages::Notice("You only have one weapon");
-		return;
+		return false;
 	}
 	if (i >= 0 && i < weapons.size())
 		currentWeapon = i;
@@ -84,6 +84,8 @@ void Unit::SwitchWeapon(short i)
 			currentWeapon = 0;
 	}
 	AP -= 2;
+	UpdateBars();
+	return true;
 }
 
 Weapon * Unit::GetWeapon(short i)
@@ -109,6 +111,17 @@ void Unit::UpdateBonuses()
 
 short Unit::Distance(sf::Vector2i a, sf::Vector2i b) {
 	return std::abs(a.x - b.x) + std::abs(a.y - b.y);
+}
+
+bool Unit::TransferWeapon(Unit * from, Unit * to, short index)
+{
+	if (from->weapons.size() > index&&index >= 0) {
+		to->weapons.push_back(from->weapons.at(index));
+		Messages::Add(to->nick + " looted " + from->weapons.at(index).Print(false, true) + " from " + from->nick);
+		from->weapons.erase(from->weapons.begin() + index);
+		return true;
+	}
+	return false;
 }
 
 bool Unit::MoveTo(sf::Vector2i pos, short ap)
@@ -164,6 +177,65 @@ bool Unit::MoveTowards(sf::Vector2i pos)
 	return false;
 }
 
+Unit* Unit::ChooseBodyFrom(sf::Vector2i pos)
+{
+	Unit* u;
+	std::string buffer = "Loot from:\n";
+	std::vector<short> units = Tile::tileRef[pos.x][pos.y].otherUnits;
+	if (units.size() == 0)
+		return nullptr;
+
+	for (short i = 0; i < units.size(); i++) {
+		u = GetUnit(units.at(i));
+		if (u != nullptr&&i != units.size() - 1)
+			buffer += std::to_string(i) + ": " + u->Print(false, true) + "\n";
+		else if (u != nullptr)
+			buffer += std::to_string(i) + ": " + u->Print(false, true);
+	}
+	char key = Messages::Prompt(buffer);
+	short sel = key - '0';
+	if (sel >= 0 && sel < units.size()) {
+		return GetUnit(units.at(sel));
+	}
+	return nullptr;
+}
+
+bool Unit::LootFrom(sf::Vector2i pos)
+{
+	if (Distance(pos, tile) < 2) {
+		Unit* u = ChooseBodyFrom(pos);
+		if (u != nullptr) {
+			while (LootFrom(u)) {
+				;
+			}
+		}
+		else {
+			return false;
+		}
+	}
+}
+
+bool Unit::LootFrom(Unit * unit)
+{
+	std::string buffer = "";
+	if (unit->weapons.size() == 0)
+		return false;
+
+	for (short i = 0; i < unit->weapons.size(); i++) {
+		buffer += std::to_string(i) + ": " + unit->weapons.at(i).Print(true);
+		if (i != weapons.size() - 1)
+			buffer += "\n";
+	}
+	char key = Messages::Prompt(buffer);
+	short sel = key - '0';
+	if (sel >= 0 && sel < unit->weapons.size()) {
+		return TransferWeapon(unit, this, sel);
+	}
+	else {
+		return LootFrom(unit->tile);
+	}
+}
+
 bool Unit::AttackTo(sf::Vector2i pos)
 {
 	if (weapons.at(currentWeapon).CanUse(attribute)) {
@@ -179,10 +251,11 @@ bool Unit::AttackTo(sf::Vector2i pos)
 					Messages::Prompt("Attack friendly unit " + target->nick + "?");
 					while (1) {
 						sf::sleep(sf::milliseconds(2));
-						sf::Keyboard::Key key = Messages::WaitInput();
-						if (key == sf::Keyboard::Key::Y)
+						char key = Messages::WaitInput();
+						key = std::tolower(key, std::locale());
+						if (key == 'y')
 							break;
-						else if (key != sf::Keyboard::Key::Unknown)
+						else if (key != 0)
 							return false;
 					}
 				}
@@ -257,22 +330,27 @@ void Unit::EndOfTurn()
 	UpdateBars();
 }
 
-std::string Unit::Print(bool full)
+std::string Unit::Print(bool full, bool justName)
 {
-	if (full) {
-		return nick + " (ID: " + std::to_string(id) + ")" +
-			"\nHP: " + std::to_string(HP) + "/" + std::to_string(maxHP) +
-			"\nAP: " + std::to_string(AP) + "/" + std::to_string(maxAP) +
-			"\nMP: " + std::to_string(MP) + "/" + std::to_string(maxMP) +
-			"\n" + weapons.at(currentWeapon).Print() +
-			"\nTo hit bonus: " + std::to_string(tohit) +
-			"\nCrit chance: " + std::to_string(100-(95+criticalHit)) + "%" +
-			"\nFail chance: " + std::to_string(5+criticalFail) + "%";
-	}
-	return nick + " (ID: " + std::to_string(id) + ")" +
+	if (justName)
+		return nick;
+	std::string buffer = nick + " (ID: " + std::to_string(id) + ")" +
 		"\nHP: " + std::to_string(HP) + "/" + std::to_string(maxHP) +
 		"\nAP: " + std::to_string(AP) + "/" + std::to_string(maxAP) +
 		"\nMP: " + std::to_string(MP) + "/" + std::to_string(maxMP);
+
+	if(full) {
+		buffer += +	"\n" + weapons.at(currentWeapon).Print() +
+			"\nTo hit bonus: " + std::to_string(tohit) +
+			"\nCrit chance: " + std::to_string(100 - (95 + criticalHit)) + "%" +
+			"\nFail chance: " + std::to_string(5 + criticalFail) + "%";
+	}
+	return buffer;
+}
+
+std::string Unit::PrintLootable()
+{
+	return std::string();
 }
 
 void Unit::UpdateBars()

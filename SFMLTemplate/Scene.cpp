@@ -198,6 +198,7 @@ void Scene::RemoveUnit(unsigned short i)
 		currentAction = "";
 	}
 	Tile::tileRef[units.at(i).tile.x][units.at(i).tile.y].unit = -1;
+	Tile::tileRef[units.at(i).tile.x][units.at(i).tile.y].otherUnits.push_back(units.at(i).id);
 	units.at(i).removed = true;
 	//units.erase(units.begin() + i);
 }
@@ -320,6 +321,9 @@ void Scene::Click()
 			if (u->AttackTo(mouseTile) && !combat)
 				EndTurn();
 		}
+		else if (currentAction == "loot") {
+			u->LootFrom(mouseTile);
+		}
 	}
 	else {
 		SetAction("");
@@ -342,8 +346,12 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 		else if (key == sf::Keyboard::A) {
 			SetAction("attack");
 		}
+		else if (key == sf::Keyboard::L) {
+			SetAction("loot");
+		}
 		else if (key == sf::Keyboard::W) {
-			u->SwitchWeapon();
+			if (u->SwitchWeapon() && !combat)
+				EndTurn();
 		}
 		else if (key == sf::Keyboard::Q) {
 			u->GetWeapon()->SwitchAttack();
