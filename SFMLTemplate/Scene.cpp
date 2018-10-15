@@ -19,7 +19,7 @@ Scene::Scene()
 		texts.at(i).setPosition(sf::Vector2f(i>4 ? 2100 : 0, i%5 * 200));
 	}
 	mouseTile = sf::Vector2i(0, 0);
-	AddUnit(&Unit("swordguy", 1, sf::Vector2i(0,0),"denho"));
+	AddUnit(&Unit("swordguy", 1, mouseTile,"denho"));
 	currentPlayer = 1;
 	currentUnit = -1;
 	currentAction = "";
@@ -31,6 +31,18 @@ Scene::~Scene()
 {
 	if (AI.joinable())
 		AI.join();
+}
+
+void Scene::CheckAICombat()
+{
+	AIInCombat.clear();
+	for (aiUnit = 0; aiUnit < units.size(); aiUnit++) {
+		if (!units.at(aiUnit).Dead() && units.at(aiUnit).player == 0) {
+			if(AIFindTarget()>=0)
+				AIInCombat.push_back(aiUnit);
+		}
+	}
+	aiUnit = -1;
 }
 
 void Scene::AITurn()
@@ -70,8 +82,7 @@ void Scene::AITurn()
 				if (units.at(index).Dead()) {
 					index = AIFindTarget();
 					if (index == -1) {
-						AIReady = true;
-						return;
+						break;
 					}
 				}
 			}
@@ -93,17 +104,55 @@ short Scene::AIFindTarget()
 			index = i;
 		}
 	}
+	if (dist >= 8)
+		return -1;
 	return index;
+}
+
+short Scene::NextFromList(short to, std::vector<short> list)
+{
+	for (int i = 0; i < list.size(); i++) {
+		if (to == list.at(i)) {
+			if (i == list.size() - 1)
+				return list.at(0);
+			else
+				return list.at(i + 1);
+		}
+	}
+}
+
+void Scene::SetCombat(bool val)
+{
+	if (combat && !val) {
+		Messages::Add("Combat ended");
+	}
+	else if (!combat && val) {
+		Messages::Add("Combat started");
+	}
+	combat = val;
 }
 
 std::vector<sf::Sprite>* Scene::Update()
 {
 	if (currentPlayer == 0 && players.size()>1) {
 		if (aiUnit == -1) {
-			AIReady = false;
-			AI = std::thread(&Scene::AITurn, this);
+			short prev = AIInCombat.size();
+			CheckAICombat();
+			if (AIInCombat.size()) {
+				SetCombat(true);
+				if (prev) {
+					AIReady = false;
+					AI = std::thread(&Scene::AITurn, this);
+				}
+				else
+					currentPlayer = NextFromList(currentPlayer, players);
+			}
+			else {
+				SetCombat(false);
+				currentPlayer = NextFromList(currentPlayer, players);
+			}
 		}
-		if (AIReady) {
+		if (AIReady&&currentPlayer==0) {
 			AI.join();
 			AIReady = false;
 			AI = std::thread(&Scene::AITurn, this);
@@ -205,17 +254,12 @@ void Scene::EndTurn()
 	for (int i = 0; i < units.size(); i++) {
 		units.at(i).EndOfTurn();
 	}
-	for (int i = 0; i < players.size(); i++) {
-		if (currentPlayer == players.at(i)) {
-			if (i == players.size() - 1)
-				currentPlayer = players.at(0);
-			else
-				currentPlayer = players.at(i + 1);
-			break;
-		}
+	currentPlayer = NextFromList(currentPlayer, players);
+	Unit* u = FindUnit(currentUnit);
+	if (u == nullptr || (u->player != currentPlayer && currentPlayer != 0)) {
+		currentUnit = -1;
+		currentAction = "";
 	}
-	currentUnit = -1;
-	currentAction = "";
 	update = true;
 }
 
@@ -263,13 +307,18 @@ void Scene::Click()
 	}
 	if(currentAction!="attack")
 		SetUnit(board.GetTile(mouseTile.x, mouseTile.y).unit);
+
+	Unit* u = FindUnit(currentUnit);
+	bool validUnit = u!=nullptr && u->player == currentPlayer;
 	
-	if (currentUnit != -1 && !Messages::prompting) {
+	if (currentUnit != -1 && !Messages::prompting && validUnit) {
 		if (currentAction == "move") {
-			FindUnit(currentUnit)->MoveTo(mouseTile);
+			if (u->MoveTo(mouseTile)&&!combat)
+				EndTurn();
 		}
 		else if (currentAction == "attack") {
-			FindUnit(currentUnit)->AttackTo(mouseTile);
+			if (u->AttackTo(mouseTile) && !combat)
+				EndTurn();
 		}
 	}
 	else {
@@ -280,10 +329,13 @@ void Scene::Click()
 
 void Scene::KeyPress(sf::Keyboard::Key key)
 {
+	Unit* u = FindUnit(currentUnit);
+	bool validUnit = u!=nullptr && u->player == currentPlayer;
+
 	if (key == sf::Keyboard::E && currentPlayer!=0) {
 		EndTurn();
 	}
-	if (currentUnit != -1 && !Messages::prompting) {
+	if (currentUnit != -1 && !Messages::prompting && validUnit) {
 		if (key == sf::Keyboard::M) {
 			SetAction("move");
 		}
@@ -291,10 +343,10 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 			SetAction("attack");
 		}
 		else if (key == sf::Keyboard::W) {
-			FindUnit(currentUnit)->SwitchWeapon();
+			u->SwitchWeapon();
 		}
 		else if (key == sf::Keyboard::Q) {
-			FindUnit(currentUnit)->GetWeapon()->SwitchAttack();
+			u->GetWeapon()->SwitchAttack();
 		}
 		else {
 			SetAction("");

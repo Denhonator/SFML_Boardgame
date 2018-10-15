@@ -33,15 +33,20 @@ public:
 	std::vector<unsigned int> drawUnits;
 private:
 	std::thread AI;
+	std::vector<short> AIInCombat;
+	void CheckAICombat();
 	void AITurn();
 	short AIFindTarget();
-	bool AIReady;
+	short NextFromList(short to, std::vector<short> list);
+	void SetCombat(bool val);
+	bool AIReady = false;
+	bool combat = false;
 	bool update;
 	short aiUnit = -1;
 	Board board;
 	sf::Vector2i mouseTile;
-	std::vector<int> players;
-	int currentPlayer;
-	int currentUnit;
+	std::vector<short> players;
+	short currentPlayer;
+	short currentUnit;
 	std::string currentAction;
 };
