@@ -1,0 +1,3 @@
+value=5,5
+type=consumable
+effect=Mana,7,3

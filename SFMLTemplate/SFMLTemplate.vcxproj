@@ -146,6 +146,8 @@
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Constants.cpp" />
+    <ClCompile Include="Effect.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Messages.cpp" />
     <ClCompile Include="Resources.cpp" />
@@ -161,6 +163,8 @@
     <ClInclude Include="Board.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="Effect.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Messages.h" />
     <ClInclude Include="Resources.h" />

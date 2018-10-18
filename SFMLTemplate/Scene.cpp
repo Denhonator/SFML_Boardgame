@@ -4,8 +4,8 @@ Scene::Scene()
 {
 	srand(time(NULL));
 	board.Randomize();
-	for (short i = 0; i < board.boardSize.x; i++) {
-		for (short j = 0; j < board.boardSize.y; j++) {
+	for (int i = 0; i < board.boardSize.x; i++) {
+		for (int j = 0; j < board.boardSize.y; j++) {
 			if (i + j > 6 && board.GetTile(i, j).sprite == "grass"&&board.GetTile(i, j).unit == -1 && rand() % 101 > 95)
 				AddUnit(&Unit("cave crab", 0, sf::Vector2i(i, j)));
 		}
@@ -47,8 +47,8 @@ void Scene::CheckAICombat()
 
 void Scene::AITurn()
 {
-	short temp = aiUnit;
-	for (short i = aiUnit + 1; i < units.size(); i++) {
+	int temp = aiUnit;
+	for (int i = aiUnit + 1; i < units.size(); i++) {
 		if (units.at(i).player == 0 && !units.at(i).Dead()) {
 			aiUnit = i;
 			break;
@@ -59,15 +59,15 @@ void Scene::AITurn()
 		EndTurn();
 	}
 	else {
-		short index = AIFindTarget();
+		int index = AIFindTarget();
 		if (index == -1) {
 			AIReady = true;
 			return;
 		}
-		short dist = Unit::Distance(units.at(aiUnit).tile, units.at(index).tile);
+		int dist = Unit::Distance(units.at(aiUnit).tile, units.at(index).tile);
 
 		if (index != -1 && dist < 8 && dist > 1) {
-			for (short i = 0; i < 5; i++) {
+			for (int i = 0; i < 5; i++) {
 				if (units.at(aiUnit).MoveTowards(units.at(index).tile))
 					sf::sleep(sf::milliseconds(300));
 				if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) < 2) {
@@ -91,14 +91,14 @@ void Scene::AITurn()
 	AIReady = true;
 }
 
-short Scene::AIFindTarget()
+int Scene::AIFindTarget()
 {
-	short dist = 100;
-	short index = -1;
-	for (short i = 0; i < units.size(); i++) {
+	int dist = 100;
+	int index = -1;
+	for (int i = 0; i < units.size(); i++) {
 		if (units.at(i).player == 0)
 			continue;
-		short newDist = Unit::Distance(units.at(aiUnit).tile, units.at(i).tile);
+		int newDist = Unit::Distance(units.at(aiUnit).tile, units.at(i).tile);
 		if (newDist < dist && !units.at(i).Dead()) {
 			dist = newDist;
 			index = i;
@@ -109,7 +109,7 @@ short Scene::AIFindTarget()
 	return index;
 }
 
-short Scene::NextFromList(short to, std::vector<short> list)
+int Scene::NextFromList(int to, std::vector<int> list)
 {
 	for (int i = 0; i < list.size(); i++) {
 		if (to == list.at(i)) {
@@ -136,7 +136,7 @@ std::vector<sf::Sprite>* Scene::Update()
 {
 	if (currentPlayer == 0 && players.size()>1) {
 		if (aiUnit == -1) {
-			short prev = AIInCombat.size();
+			int prev = AIInCombat.size();
 			CheckAICombat();
 			if (AIInCombat.size()) {
 				SetCombat(true);
@@ -191,7 +191,7 @@ void Scene::AddUnit(Unit * unit)
 	Unit::unit = &units;
 }
 
-void Scene::RemoveUnit(unsigned short i)
+void Scene::RemoveUnit(unsigned int i)
 {
 	if (currentUnit == units.at(i).id) {
 		currentUnit = -1;
@@ -267,8 +267,8 @@ void Scene::EndTurn()
 void Scene::UpdateState()
 {
 	update = false;
-	short index = -1;
-	for (short i = 0; i < players.size(); i++) {
+	int index = -1;
+	for (int i = 0; i < players.size(); i++) {
 		if (players.at(i) == currentPlayer) {
 			index = i;
 		}
@@ -322,7 +322,12 @@ void Scene::Click()
 				EndTurn();
 		}
 		else if (currentAction == "loot") {
-			u->LootFrom(mouseTile);
+			if (!u->LootFrom(mouseTile))
+				Messages::Notice("Nothing to loot there");
+		}
+		else if (currentAction == "item") {
+			if (!u->UseItem(mouseTile))
+				Messages::Notice("Invalid item usage");
 		}
 	}
 	else {
@@ -348,6 +353,12 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 		}
 		else if (key == sf::Keyboard::L) {
 			SetAction("loot");
+		}
+		else if (key == sf::Keyboard::U) {
+			SetAction("item");
+		}
+		else if (key == sf::Keyboard::I) {
+			u->SwitchItem();
 		}
 		else if (key == sf::Keyboard::W) {
 			if (u->SwitchWeapon() && !combat)

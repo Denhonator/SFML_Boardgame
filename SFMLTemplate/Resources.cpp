@@ -4,7 +4,7 @@ std::map<std::string, sf::Texture> Resources::tile = {};
 std::map<std::string, sf::Font> Resources::font = {};
 std::map<std::string, sf::SoundBuffer> Resources::sound;
 std::vector<sf::Sound> Resources::player;
-short Resources::roll = 0;
+int Resources::roll = 0;
 std::vector <sf::Vector2i> Resources::voffs = {sf::Vector2i(0,0),sf::Vector2i(-1,0) ,sf::Vector2i(0,-1) ,sf::Vector2i(1,0) ,sf::Vector2i(0,1) ,sf::Vector2i(1,1) ,sf::Vector2i(-1,-1) ,sf::Vector2i(1,-1) ,sf::Vector2i(-1,1) };
 
 void Resources::RollerFunction() {
@@ -69,7 +69,7 @@ std::vector<std::string> Resources::GetText(std::string path)
 
 void Resources::PlayWav(std::string s)
 {
-	short index = -1;
+	int index = -1;
 	for (int i = 0; i < player.size(); i++) {
 		if (player.at(i).getStatus() != sf::Sound::Status::Playing) {
 			index = i;
@@ -140,7 +140,7 @@ bool Resources::StrInVector(std::string s, std::vector<std::string> v)
 	return std::find(v.begin(), v.end(), s) != v.end();
 }
 
-short Resources::Roll()
+int Resources::Roll()
 {
 	return roll;
 }
@@ -152,7 +152,7 @@ std::vector<sf::Vector2i> Resources::Voffs()
 	r.push_back(t.at(0));
 	t.erase(t.begin());
 	while (t.size() > 0) {
-		short x = roll % t.size();
+		int x = roll % t.size();
 		r.push_back(t.at(x));
 		t.erase(t.begin() + x);
 	}

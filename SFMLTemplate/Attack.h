@@ -4,15 +4,15 @@
 class Attack
 {
 public:
-	Attack(short attacker, std::string name, short chancetohit, Damage d, short range, short ap, short mp);
+	Attack(int attacker, std::string name, int chancetohit, Damage d, int range, int ap, int mp);
 	~Attack();
 	void Roll();
 	std::string name;
-	short attacker;
+	int attacker;
 	Damage damage;
-	short range, ap, mp;
-	short roll;
-	short successThreshold;
+	int range, ap, mp;
+	int roll;
+	int successThreshold;
 	bool crit, fail;
 	sf::Vector2i knockback;
 };

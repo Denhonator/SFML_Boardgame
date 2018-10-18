@@ -4,19 +4,19 @@
 class Weapon
 {
 public:
-	Weapon(std::string name, short level, short owner);
+	Weapon(std::string name, int level, int owner);
 	~Weapon();
 	std::string Print(bool full = false, bool justName = false);
-	void SwitchAttack(short i = -1);
-	Attack GetAttack(short i = -1);
-	bool CanUse(std::map<std::string, short> attributes);
+	void SwitchAttack(int i = -1);
+	Attack GetAttack(int i = -1);
+	bool CanUse(std::map<std::string, int> attributes);
 private:
-	short owner;
+	int owner;
 	std::string name;
-	short level;
-	short baseDamage;
-	short currentAttack;
+	int level;
+	int baseDamage;
+	int currentAttack;
 	std::vector<Attack> attacks;
-	std::map<std::string, short> requirment;
+	std::map<std::string, int> requirment;
 };
 

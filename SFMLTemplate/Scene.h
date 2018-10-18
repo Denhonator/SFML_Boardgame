@@ -13,7 +13,7 @@ public:
 	std::vector<sf::Sprite>* Update();
 	void AddTile(sf::Sprite* spr);
 	void AddUnit(Unit* unit);
-	void RemoveUnit(unsigned short i);
+	void RemoveUnit(unsigned int i);
 	void SetTileSize(int size) { board.SetTileSize(size); };
 	void MouseHover(sf::Vector2i pos);
 	void Click();
@@ -33,20 +33,20 @@ public:
 	std::vector<unsigned int> drawUnits;
 private:
 	std::thread AI;
-	std::vector<short> AIInCombat;
+	std::vector<int> AIInCombat;
 	void CheckAICombat();
 	void AITurn();
-	short AIFindTarget();
-	short NextFromList(short to, std::vector<short> list);
+	int AIFindTarget();
+	int NextFromList(int to, std::vector<int> list);
 	void SetCombat(bool val);
 	bool AIReady = false;
 	bool combat = false;
 	bool update;
-	short aiUnit = -1;
+	int aiUnit = -1;
 	Board board;
 	sf::Vector2i mouseTile;
-	std::vector<short> players;
-	short currentPlayer;
-	short currentUnit;
+	std::vector<int> players;
+	int currentPlayer;
+	int currentUnit;
 	std::string currentAction;
 };

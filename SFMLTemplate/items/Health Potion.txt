@@ -1,0 +1,3 @@
+value=5,5
+type=consumable
+effect=Heal,7,3

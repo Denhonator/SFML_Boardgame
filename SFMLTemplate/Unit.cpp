@@ -14,11 +14,12 @@ Unit::Unit(std::string name, int player, sf::Vector2i pos, std::string nick)
 		nick = name;
 	this->nick = nick;
 	XP = 0;
+	id = unitCount;
 	LoadFromFile("units/" + name + "/" + nick);
 	if(weapons.size()==0)
 		AddWeapon("self", 1);
 	currentWeapon = 0;
-	id = unitCount;
+	currentItem = 0;
 	tile = pos;
 	sprite.setPosition(tile.x*Constants::tileSize, tile.y*Constants::tileSize);
 	Tile::tileRef[tile.x][tile.y].unit = id;
@@ -56,18 +57,26 @@ void Unit::LoadFromFile(std::string path)
 		else if (temp.first == "weapon") {
 			AddWeapon(temp.second.at(0), std::stoi(temp.second.at(1)));
 		}
+		else if (temp.first == "item") {
+			AddItem(temp.second.at(0), std::stoi(temp.second.at(1)), std::stoi(temp.second.at(2)));
+		}
 		else if (temp.first == "xp") {
 			XP = std::stoi(temp.second.at(0));
 		}
 	}
 }
 
-void Unit::AddWeapon(std::string name, short level)
+void Unit::AddWeapon(std::string name, int level)
 {
 	weapons.push_back(Weapon(name, level, id));
 }
 
-bool Unit::SwitchWeapon(short i)
+void Unit::AddItem(std::string name, int level, int count)
+{
+	items.push_back(Item(name, level, id, count));
+}
+
+bool Unit::SwitchWeapon(int i)
 {
 	if (AP < 2 || weapons.size()==1) {
 		if (AP < 2)
@@ -88,7 +97,17 @@ bool Unit::SwitchWeapon(short i)
 	return true;
 }
 
-Weapon * Unit::GetWeapon(short i)
+bool Unit::SwitchItem(int i)
+{
+	if (i < 0)
+		i = currentItem + 1;
+	if (i >= items.size())
+		i = 0;
+	currentItem = i;
+	return items.size();
+}
+
+Weapon * Unit::GetWeapon(int i)
 {
 	if (i<0 || i>weapons.size()) {
 		i = currentWeapon;
@@ -109,11 +128,11 @@ void Unit::UpdateBonuses()
 	charBonus = -10 + attribute["charisma"] * 4;
 }
 
-short Unit::Distance(sf::Vector2i a, sf::Vector2i b) {
+int Unit::Distance(sf::Vector2i a, sf::Vector2i b) {
 	return std::abs(a.x - b.x) + std::abs(a.y - b.y);
 }
 
-bool Unit::TransferWeapon(Unit * from, Unit * to, short index)
+bool Unit::TransferWeapon(Unit * from, Unit * to, int index)
 {
 	if (from->weapons.size() > index&&index >= 0) {
 		to->weapons.push_back(from->weapons.at(index));
@@ -124,7 +143,7 @@ bool Unit::TransferWeapon(Unit * from, Unit * to, short index)
 	return false;
 }
 
-bool Unit::MoveTo(sf::Vector2i pos, short ap)
+bool Unit::MoveTo(sf::Vector2i pos, int ap)
 {
 	pos = sf::Vector2i(std::min(std::max(pos.x, 0), Constants::boardSize - 1), std::min(std::max(pos.y, 0), Constants::boardSize - 1));
 	if (Tile::tileRef[pos.x][pos.y].sprite != "0" && Tile::tileRef[pos.x][pos.y].unit==-1) {
@@ -166,11 +185,11 @@ bool Unit::MoveTowards(sf::Vector2i pos)
 	if (dif.y < 0)
 		dif.y = -1;
 	std::vector<sf::Vector2i> voffs = Resources::Voffs();
-	for (short i = 0; i < voffs.size();i++) {
+	for (int i = 0; i < voffs.size();i++) {
 		if (MoveTo(tile + dif + voffs.at(i)))
 			return true;
 	}
-	for (short i = 0; i < voffs.size(); i++) {
+	for (int i = 0; i < voffs.size(); i++) {
 		if (Push(tile + dif + voffs.at(i)))
 			return true;
 	}
@@ -181,11 +200,11 @@ Unit* Unit::ChooseBodyFrom(sf::Vector2i pos)
 {
 	Unit* u;
 	std::string buffer = "Loot from:\n";
-	std::vector<short> units = Tile::tileRef[pos.x][pos.y].otherUnits;
+	std::vector<int> units = Tile::tileRef[pos.x][pos.y].otherUnits;
 	if (units.size() == 0)
 		return nullptr;
 
-	for (short i = 0; i < units.size(); i++) {
+	for (int i = 0; i < units.size(); i++) {
 		u = GetUnit(units.at(i));
 		if (u != nullptr&&i != units.size() - 1)
 			buffer += std::to_string(i) + ": " + u->Print(false, true) + "\n";
@@ -193,7 +212,7 @@ Unit* Unit::ChooseBodyFrom(sf::Vector2i pos)
 			buffer += std::to_string(i) + ": " + u->Print(false, true);
 	}
 	char key = Messages::Prompt(buffer);
-	short sel = key - '0';
+	int sel = key - '0';
 	if (sel >= 0 && sel < units.size()) {
 		return GetUnit(units.at(sel));
 	}
@@ -208,11 +227,13 @@ bool Unit::LootFrom(sf::Vector2i pos)
 			while (LootFrom(u)) {
 				;
 			}
+			return true;
 		}
 		else {
 			return false;
 		}
 	}
+	return false;
 }
 
 bool Unit::LootFrom(Unit * unit)
@@ -221,13 +242,13 @@ bool Unit::LootFrom(Unit * unit)
 	if (unit->weapons.size() == 0)
 		return false;
 
-	for (short i = 0; i < unit->weapons.size(); i++) {
+	for (int i = 0; i < unit->weapons.size(); i++) {
 		buffer += std::to_string(i) + ": " + unit->weapons.at(i).Print(true);
 		if (i != weapons.size() - 1)
 			buffer += "\n";
 	}
 	char key = Messages::Prompt(buffer);
-	short sel = key - '0';
+	int sel = key - '0';
 	if (sel >= 0 && sel < unit->weapons.size()) {
 		return TransferWeapon(unit, this, sel);
 	}
@@ -303,10 +324,41 @@ bool Unit::Push(sf::Vector2i pos)
 	return false;
 }
 
+bool Unit::UseItem(sf::Vector2i pos, int i)
+{
+	if (i < 0) {
+		i = currentItem;
+	}
+	if (i >= 0 && i < items.size() && items.at(i).range>=Distance(pos,tile) && AP >= 5) {
+		Unit* u;
+		u = pos == tile ? this : GetUnit(Tile::tileRef[pos.x][pos.y].unit);
+		if (u == nullptr)
+			return false;
+		std::vector<Effect>* effects = items.at(i).Consume();
+		for (int j = 0; j < effects->size(); j++) {
+			u->GetAffected(effects->at(j));
+		}
+		AP -= 5;
+		UpdateBars();
+		return true;
+	}
+	return false;
+}
+
+void Unit::GetAffected(Effect e)
+{
+	Unit* u = GetUnit(e.owner);
+	Messages::Add((u!=nullptr ? u->nick : "Someone") + " used " + e.itemName + " on " + nick);
+	HP = std::min(maxHP, HP + e.hp);
+	MP = std::min(maxMP, MP + e.mp);
+	AP = std::min(maxAP, AP + e.ap);
+	UpdateBars();
+}
+
 void Unit::GetAttacked(Attack a)
 {
-	short mult = a.crit ? 2 : 1;
-	short temp = HP;
+	int mult = a.crit ? 2 : 1;
+	int temp = HP;
 	HP -= a.damage.physical * mult;
 	HP -= a.damage.fire * mult;
 	HP -= a.damage.ice * mult;
@@ -341,6 +393,7 @@ std::string Unit::Print(bool full, bool justName)
 
 	if(full) {
 		buffer += +	"\n" + weapons.at(currentWeapon).Print() +
+			"\nItem: " + items.at(currentItem).Print() +
 			"\nTo hit bonus: " + std::to_string(tohit) +
 			"\nCrit chance: " + std::to_string(100 - (95 + criticalHit)) + "%" +
 			"\nFail chance: " + std::to_string(5 + criticalFail) + "%";
@@ -381,14 +434,14 @@ void Unit::UpdateBars()
 	bars[16].position = sprite.getPosition() + offset + sf::Vector2f(0, heigth);
 	bars[17].position = sprite.getPosition() + offset + sf::Vector2f(width, heigth);
 
-	for (short i = 0; i < 8; i++) {
+	for (int i = 0; i < 8; i++) {
 		bars[i].color = sf::Color(i<4?0:200, 0, 0, 255);
 	}
-	for (short i = 8; i < 10; i++) {
+	for (int i = 8; i < 10; i++) {
 		bars[i].color = sf::Color(0, 0, 0, 0);
 	}
-	for (short i = 10; i < 18; i++) {
-		short mult = i < 14 ? 0 : 1;
+	for (int i = 10; i < 18; i++) {
+		int mult = i < 14 ? 0 : 1;
 		bars[i].color = sf::Color(255*mult, 255*mult, 200*mult, 255);
 	}
 }

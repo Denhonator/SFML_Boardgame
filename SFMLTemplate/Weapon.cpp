@@ -1,6 +1,6 @@
 #include "Weapon.h"
 
-Weapon::Weapon(std::string name, short level, short owner)
+Weapon::Weapon(std::string name, int level, int owner)
 {
 	this->owner = owner;
 	this->level = level;
@@ -16,7 +16,7 @@ Weapon::Weapon(std::string name, short level, short owner)
 				requirment[temp.first] = std::stoi(temp.second.at(0)) + std::stoi(temp.second.at(1))*(level - 1);
 			}
 			else {
-				short damage = (baseDamage * std::stoi(temp.second.at(1))) / 100;
+				int damage = (baseDamage * std::stoi(temp.second.at(1))) / 100;
 				attacks.push_back(Attack(owner, temp.first, std::stoi(temp.second.at(0)), Damage{ damage,0,0,0 }, 1, 5, 0));
 			}
 		}
@@ -33,7 +33,7 @@ std::string Weapon::Print(bool full, bool justName)
 	if (justName)
 		return buffer;
 	if (full) {
-		for (short i = 0; i < attacks.size(); i++) {
+		for (int i = 0; i < attacks.size(); i++) {
 			buffer += "\n" + attacks.at(i).name + " " +
 				std::to_string(100 - attacks.at(i).successThreshold) + "% " +
 				std::to_string(attacks.at(i).damage.physical) + "," +
@@ -52,7 +52,7 @@ std::string Weapon::Print(bool full, bool justName)
 		std::to_string(attacks.at(currentAttack).damage.lightning);
 }
 
-void Weapon::SwitchAttack(short i)
+void Weapon::SwitchAttack(int i)
 {
 	if (i >= 0 && i < attacks.size())
 		currentAttack = i;
@@ -63,7 +63,7 @@ void Weapon::SwitchAttack(short i)
 	}
 }
 
-Attack Weapon::GetAttack(short i)
+Attack Weapon::GetAttack(int i)
 {
 	if (i < 0 || i >= attacks.size())
 		i = currentAttack;
@@ -71,7 +71,7 @@ Attack Weapon::GetAttack(short i)
 	return attacks.at(i);
 }
 
-bool Weapon::CanUse(std::map<std::string, short> attributes)
+bool Weapon::CanUse(std::map<std::string, int> attributes)
 {
 	for (int i = 0; i < Constants::attributes.size(); i++) {
 		if (requirment.count(Constants::attributes.at(i))) {

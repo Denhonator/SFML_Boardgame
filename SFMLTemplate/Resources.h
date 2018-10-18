@@ -20,7 +20,7 @@ public:
 	static std::pair<std::string, std::vector<int>> KeyWithInts(std::string line);
 	static std::pair<std::string, std::vector<std::string>> KeyWithStrings(std::string line);
 	static bool StrInVector(std::string s, std::vector<std::string> v);
-	static short Roll();
+	static int Roll();
 	static std::vector <sf::Vector2i> Voffs();
 private:
 	void RollerFunction();
@@ -28,13 +28,13 @@ private:
 	static std::map<std::string, sf::Font> font;
 	static std::map<std::string, sf::SoundBuffer> sound;
 	static std::vector<sf::Sound> player;
-	static short roll;
+	static int roll;
 	std::thread roller;
 	bool running;
 	static std::vector <sf::Vector2i> voffs;
 };
 
 struct Damage {
-	short physical, fire, ice, lightning;
+	int physical, fire, ice, lightning;
 };
 

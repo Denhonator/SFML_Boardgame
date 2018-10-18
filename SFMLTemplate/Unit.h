@@ -4,6 +4,7 @@
 #include "Tile.h"
 #include "Weapon.h"
 #include "Messages.h"
+#include "Item.h"
 
 class Unit
 {
@@ -11,19 +12,23 @@ public:
 	Unit(std::string name, int player=0, sf::Vector2i pos=sf::Vector2i(0,0), std::string nick="");
 	~Unit();
 	static Unit* GetUnit(int id);
-	static short Distance(sf::Vector2i a, sf::Vector2i b);
-	static bool TransferWeapon(Unit* from, Unit* to, short index);
+	static int Distance(sf::Vector2i a, sf::Vector2i b);
+	static bool TransferWeapon(Unit* from, Unit* to, int index);
 	void LoadFromFile(std::string path);
-	bool MoveTo(sf::Vector2i pos, short ap = 3);
+	bool MoveTo(sf::Vector2i pos, int ap = 3);
 	bool MoveTowards(sf::Vector2i pos);
 	bool LootFrom(sf::Vector2i pos);
 	bool LootFrom(Unit* unit);
 	bool AttackTo(sf::Vector2i pos);
 	bool Push(sf::Vector2i pos);
+	bool UseItem(sf::Vector2i pos, int i = -1);
+	void GetAffected(Effect e);
 	void GetAttacked(Attack a);
-	void AddWeapon(std::string name, short level);
-	bool SwitchWeapon(short i = -1);
-	Weapon* GetWeapon(short i = -1);
+	void AddWeapon(std::string name, int level);
+	void AddItem(std::string name, int level, int count);
+	bool SwitchWeapon(int i = -1);
+	bool SwitchItem(int i = -1);
+	Weapon* GetWeapon(int i = -1);
 	void UpdateBonuses();
 	bool Dead() { return HP <= 0; };
 	void EndOfTurn();
@@ -42,13 +47,14 @@ private:
 	int pushedBy = -1;
 	static int unitCount;
 	std::string name, nick;
-	short maxAP, AP;
-	short maxHP, HP;
-	short maxMP, MP;
-	short XP;
-	short tohit, tocast, criticalHit, criticalFail, luckBonus, charBonus;
-	short currentWeapon;
+	int maxAP, AP;
+	int maxHP, HP;
+	int maxMP, MP;
+	int XP;
+	int tohit, tocast, criticalHit, criticalFail, luckBonus, charBonus;
+	int currentWeapon, currentItem;
 	std::vector<Weapon> weapons;
-	std::map<std::string, short> attribute;
-	std::map<std::string, short> attributeGain;
+	std::vector<Item> items;
+	std::map<std::string, int> attribute;
+	std::map<std::string, int> attributeGain;
 };

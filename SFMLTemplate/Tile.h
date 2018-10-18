@@ -10,7 +10,7 @@ public:
 	std::string Print();
 	std::string sprite;
 	static Tile* tileRef[Constants::boardSize];
-	short unit;
-	std::vector<short> otherUnits;
+	int unit;
+	std::vector<int> otherUnits;
 };
 

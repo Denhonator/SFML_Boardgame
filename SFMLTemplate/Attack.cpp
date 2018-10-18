@@ -1,6 +1,6 @@
 #include "Attack.h"
 
-Attack::Attack(short attacker, std::string name, short chancetohit, Damage d, short range, short ap, short mp)
+Attack::Attack(int attacker, std::string name, int chancetohit, Damage d, int range, int ap, int mp)
 {
 	this->name = name;
 	this->range = range;
