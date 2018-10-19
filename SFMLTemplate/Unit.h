@@ -5,6 +5,7 @@
 #include "Weapon.h"
 #include "Messages.h"
 #include "Item.h"
+#include "Equipment.h"
 
 class Unit
 {
@@ -25,8 +26,11 @@ public:
 	void GetAffected(Effect e);
 	void GetAttacked(Attack a);
 	void AddWeapon(std::string name, int level);
+	void AddEquipment(std::string name, int level);
 	void AddItem(std::string name, int level, int count);
 	bool SwitchWeapon(int i = -1);
+	bool Unequip(int i, int slot = 0, bool quiet = false);
+	bool Equip(int i, int slot = 0, bool quiet = false);
 	bool SwitchItem(int i = -1);
 	Weapon* GetWeapon(int i = -1);
 	void UpdateBonuses();
@@ -47,6 +51,7 @@ private:
 	int pushedBy = -1;
 	static int unitCount;
 	std::string name, nick;
+	Damage armor;
 	int maxAP, AP;
 	int maxHP, HP;
 	int maxMP, MP;
@@ -55,6 +60,8 @@ private:
 	int currentWeapon, currentItem;
 	std::vector<Weapon> weapons;
 	std::vector<Item> items;
+	std::vector<Equipment> equipment;
+	std::map<std::string, Equipment*> equipSlot;
 	std::map<std::string, int> attribute;
 	std::map<std::string, int> attributeGain;
 };

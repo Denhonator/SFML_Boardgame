@@ -6,6 +6,7 @@ public:
 	Messages();
 	~Messages();
 	static void Add(std::string s);
+	static void UpdatePos();
 	static void Notice(std::string s);
 	static void FadeNotice(float f=1);
 	static char Prompt(std::string s);

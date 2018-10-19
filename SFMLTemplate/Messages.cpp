@@ -39,6 +39,13 @@ void Messages::Add(std::string s)
 	log.setPosition(Constants::fixedView.left + Constants::fixedView.width / 3, Constants::fixedView.top + Constants::fixedView.height*0.82f);
 }
 
+void Messages::UpdatePos()
+{
+	log.setPosition(Constants::fixedView.left + Constants::fixedView.width / 3, Constants::fixedView.top + Constants::fixedView.height*0.82f);
+	notice.setPosition(Constants::fixedView.left + Constants::fixedView.width / 3, Constants::fixedView.top);
+	prompt.setPosition(Constants::fixedView.left + Constants::fixedView.width / 3, Constants::fixedView.height / 3);
+}
+
 void Messages::Notice(std::string s)
 {
 	notice.setString(s);

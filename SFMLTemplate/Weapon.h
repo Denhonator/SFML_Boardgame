@@ -1,6 +1,7 @@
 #pragma once
 #include "Attack.h"
 #include "Constants.h"
+
 class Weapon
 {
 public:

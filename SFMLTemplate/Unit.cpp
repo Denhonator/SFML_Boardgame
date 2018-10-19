@@ -54,8 +54,18 @@ void Unit::LoadFromFile(std::string path)
 			attribute[temp.first] = std::stoi(temp.second.at(0));
 			attributeGain[temp.first] = std::stoi(temp.second.at(1));
 		}
+		else if (Resources::StrInVector(temp.first, Constants::equipSlots)) {
+			AddEquipment(temp.second.at(0), std::stoi(temp.second.at(1)));
+			char c = temp.first[temp.first.size() - 1];
+			if (c > '9' || c < '0')
+				c = '0';
+			Equip(equipment.size() - 1, c-'0', true);
+		}
 		else if (temp.first == "weapon") {
 			AddWeapon(temp.second.at(0), std::stoi(temp.second.at(1)));
+		}
+		else if (temp.first == "equipment") {
+			AddEquipment(temp.second.at(0), std::stoi(temp.second.at(1)));
 		}
 		else if (temp.first == "item") {
 			AddItem(temp.second.at(0), std::stoi(temp.second.at(1)), std::stoi(temp.second.at(2)));
@@ -69,6 +79,11 @@ void Unit::LoadFromFile(std::string path)
 void Unit::AddWeapon(std::string name, int level)
 {
 	weapons.push_back(Weapon(name, level, id));
+}
+
+void Unit::AddEquipment(std::string name, int level)
+{
+	equipment.push_back(Equipment(name, level, id));
 }
 
 void Unit::AddItem(std::string name, int level, int count)
@@ -95,6 +110,51 @@ bool Unit::SwitchWeapon(int i)
 	AP -= 2;
 	UpdateBars();
 	return true;
+}
+
+bool Unit::Unequip(int i, int slot, bool quiet)
+{
+	if (!equipment.at(i).inUse||(AP<2&&!quiet))
+		return false;
+	AP -= 2;
+	equipment.at(i).inUse = false;
+	equipSlot.erase(equipment.at(i).GetType() + std::to_string(equipment.at(i).currentSlot));
+	if(!quiet)
+		Messages::Add(nick + " unequipped " + equipment.at(i).Print(false, true));
+	return true;
+}
+
+bool Unit::Equip(int i, int slot, bool quiet)
+{
+	if (Unequip(i,slot,quiet)) {
+		return true;
+	}
+	if (i >= 0 && i < equipment.size()) {
+		if (!quiet&&!equipment.at(i).CanUse(attribute)) {
+			Messages::Notice("You don't meet the requirments");
+			return false;
+		}
+		if (AP < 2 && !quiet) {
+			Messages::Notice("Not enough AP");
+			return false;
+		}
+		AP -= 2;
+		std::string s = equipment.at(i).GetType();
+		if (slot > 0 && slot < 10)
+			s += std::to_string(slot);
+
+		if (equipSlot.count(s)) {	//If slot taken, unequip that
+			equipSlot[s]->inUse = false;
+			equipSlot.erase(s);
+		}
+		equipment.at(i).inUse = true;
+		equipment.at(i).currentSlot = slot;
+		equipSlot[s] = &equipment.at(i);
+		if(!quiet)
+			Messages::Add(nick + " equipped " + equipment.at(i).Print(false, true));
+		return true;
+	}
+	return false;
 }
 
 bool Unit::SwitchItem(int i)
@@ -126,6 +186,16 @@ void Unit::UpdateBonuses()
 	criticalFail = 10 - attribute["perception"];
 	luckBonus = -8 + attribute["luck"];
 	charBonus = -10 + attribute["charisma"] * 4;
+
+	armor = { 0,0,0,0 };
+	for (int i = 0; i < equipment.size(); i++) {
+		if (equipment.at(i).inUse) {
+			armor.physical += equipment.at(i).armor.physical;
+			armor.fire += equipment.at(i).armor.fire;
+			armor.ice += equipment.at(i).armor.ice;
+			armor.lightning += equipment.at(i).armor.lightning;
+		}
+	}
 }
 
 int Unit::Distance(sf::Vector2i a, sf::Vector2i b) {
@@ -392,8 +462,12 @@ std::string Unit::Print(bool full, bool justName)
 		"\nMP: " + std::to_string(MP) + "/" + std::to_string(maxMP);
 
 	if(full) {
-		buffer += +	"\n" + weapons.at(currentWeapon).Print() +
+		buffer += +"\n" + weapons.at(currentWeapon).Print() +
 			"\nItem: " + items.at(currentItem).Print() +
+			"\nArmor: " + std::to_string(armor.physical) + "," +
+			std::to_string(armor.fire) + "," +
+			std::to_string(armor.ice) + "," +
+			std::to_string(armor.lightning) +
 			"\nTo hit bonus: " + std::to_string(tohit) +
 			"\nCrit chance: " + std::to_string(100 - (95 + criticalHit)) + "%" +
 			"\nFail chance: " + std::to_string(5 + criticalFail) + "%";

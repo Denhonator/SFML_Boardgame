@@ -8,5 +8,6 @@ vitality=4,10
 luck=4,10
 weapon=self,1
 weapon=sword,1
+head=helmet,1
 item=Health Potion,1,10
 item=Mana Potion,1,10

@@ -2,6 +2,7 @@
 
 float Constants::tileSize;
 std::vector<std::string> Constants::attributes = { "strength","dexterity","perception","charisma","willpower","intelligence","vitality","luck" };
+std::vector<std::string> Constants::equipSlots = { "head","torso","legs","hands","feet","shield","ring","ring1","amulet" };
 sf::FloatRect Constants::fixedView;
 
 Constants::Constants()

@@ -8,6 +8,7 @@ Main::Main()
 	view = window.getView();
 	fixedView = sf::View(sf::FloatRect(0, 0, window.getSize().x*1.25f, window.getSize().y*1.25f));
 	Constants::UpdateView(fixedView);
+	Messages::UpdatePos();
 
 	window.setFramerateLimit(55);
 	mainScene.SetTileSize(window.getSize().y / mainScene.GetBoard()->boardSize.y);
