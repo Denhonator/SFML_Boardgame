@@ -37,6 +37,12 @@
     <Filter Include="Header Files\Unit Level">
       <UniqueIdentifier>{76efbb89-6a84-406e-bfd6-0651261360e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Menu">
+      <UniqueIdentifier>{0e916eda-ebfd-477b-9295-e1213c2529b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Menu">
+      <UniqueIdentifier>{f145c947-889c-4cfc-90b4-e51c8c89fab4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -87,6 +93,12 @@
     <ClCompile Include="Equipment.cpp">
       <Filter>Source Files\Unit Level</Filter>
     </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Source Files\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuElement.cpp">
+      <Filter>Source Files\Menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h">
@@ -133,6 +145,12 @@
     </ClInclude>
     <ClInclude Include="Equipment.h">
       <Filter>Header Files\Unit Level</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu.h">
+      <Filter>Header Files\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuElement.h">
+      <Filter>Header Files\Menu</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

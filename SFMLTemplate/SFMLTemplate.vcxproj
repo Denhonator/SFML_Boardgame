@@ -150,6 +150,8 @@
     <ClCompile Include="Equipment.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="MenuElement.cpp" />
     <ClCompile Include="Messages.cpp" />
     <ClCompile Include="Resources.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -168,6 +170,8 @@
     <ClInclude Include="Equipment.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Main.h" />
+    <ClInclude Include="Menu.h" />
+    <ClInclude Include="MenuElement.h" />
     <ClInclude Include="Messages.h" />
     <ClInclude Include="Resources.h" />
     <ClInclude Include="Scene.h" />

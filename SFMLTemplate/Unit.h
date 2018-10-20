@@ -33,11 +33,13 @@ public:
 	bool Equip(int i, int slot = 0, bool quiet = false);
 	bool SwitchItem(int i = -1);
 	Weapon* GetWeapon(int i = -1);
+	bool LevelUp(std::string a);
 	void UpdateBonuses();
 	bool Dead() { return HP <= 0; };
 	void EndOfTurn();
 	std::string Print(bool full = false, bool justName = false);
 	std::string PrintLootable();
+	int GetAttribute(std::string s);
 	void UpdateBars();
 	int player;
 	int id;

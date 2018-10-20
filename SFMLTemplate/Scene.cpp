@@ -12,8 +12,8 @@ Scene::Scene()
 	}
 	const sf::Texture& bg = board.GetTexture(true)->getTexture();
 	AddTile(&sf::Sprite(bg));
-	ui.push_back(sf::Sprite(*Resources::GetTexture("ui/outline")));
-	ui.at(0).setScale(Constants::tileSize / ui.at(0).getLocalBounds().width, Constants::tileSize / ui.at(0).getLocalBounds().height);
+	boardUi.push_back(sf::Sprite(*Resources::GetTexture("ui/outline")));
+	boardUi.at(0).setScale(Constants::tileSize / boardUi.at(0).getLocalBounds().width, Constants::tileSize / boardUi.at(0).getLocalBounds().height);
 	for (int i = 0; i < 10; i++) {
 		texts.push_back(sf::Text("", *Resources::GetFont("default.ttf")));
 		texts.at(i).setPosition(sf::Vector2f(i>4 ? 2100 : 0, i%5 * 200));
@@ -24,6 +24,7 @@ Scene::Scene()
 	currentUnit = -1;
 	currentAction = "";
 	players = { 1 };
+	menu = Menu(-1, -1);
 	UpdateState();
 }
 
@@ -212,8 +213,8 @@ void Scene::MouseHover(sf::Vector2i pos)
 	sf::Vector2i old = mouseTile;
 	mouseTile = LimitToBoard(sf::Vector2f(board.boardSize.x*pos.x/tiles.at(0).getLocalBounds().width, board.boardSize.y*pos.y / tiles.at(0).getLocalBounds().height), &board);
 	if (old != mouseTile) {
-		ui.at(0).setColor(sf::Color(255, 255, 255, mouseTile.x < 0 ? 0 : 255));
-		ui.at(0).setPosition(mouseTile.x*tiles.at(0).getLocalBounds().width / board.boardSize.x, mouseTile.y*tiles.at(0).getLocalBounds().height / board.boardSize.y);
+		boardUi.at(0).setColor(sf::Color(255, 255, 255, mouseTile.x < 0 ? 0 : 255));
+		boardUi.at(0).setPosition(mouseTile.x*tiles.at(0).getLocalBounds().width / board.boardSize.x, mouseTile.y*tiles.at(0).getLocalBounds().height / board.boardSize.y);
 		texts.at(5).setString(board.GetTile(mouseTile.x, mouseTile.y).Print());
 		Unit* u = Unit::GetUnit(board.GetTile(mouseTile.x,mouseTile.y).unit);
 		texts.at(6).setString(u != nullptr ? u->Print() : "");
@@ -300,17 +301,38 @@ void Scene::UpdateState()
 
 void Scene::Click()
 {
-	if (mouseTile.x < 0) {
+	if (menu.state<0 && mouseTile.x < 0) {
 		currentUnit = -1;
 		currentAction = "";
 		update = true;
 		return;
 	}
-	if(currentAction!="attack")
-		SetUnit(board.GetTile(mouseTile.x, mouseTile.y).unit);
 
 	Unit* u = FindUnit(currentUnit);
-	bool validUnit = u!=nullptr && u->player == currentPlayer;
+	bool validUnit = u != nullptr && u->player == currentPlayer;
+
+	if (menu.state>=0 && menu.player>=0) {
+		u = FindUnit(menu.player);
+		validUnit = u != nullptr;
+		for (int i = 0; i < menu.elements.size(); i++) {
+			if (menu.elements.at(i).sprite.getGlobalBounds().contains(mousePos)) {
+				if (validUnit) {
+					if (Resources::StrInVector(menu.elements.at(i).name, Constants::attributes)&&menu.elements.at(i).value==1) {
+						if (u->LevelUp(menu.elements.at(i).name)) {
+							Messages::Add(u->Print(false, true) + " leveled up!");
+						}
+						else {
+							Messages::Notice("Not enough XP");
+						}
+					}
+				}
+			}
+		}
+		return;
+	}
+	
+	if(currentAction!="attack")
+		SetUnit(board.GetTile(mouseTile.x, mouseTile.y).unit);
 	
 	if (currentUnit != -1 && !Messages::prompting && validUnit) {
 		if (currentAction == "move") {
@@ -344,7 +366,7 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 	if (key == sf::Keyboard::E && currentPlayer!=0) {
 		EndTurn();
 	}
-	if (currentUnit != -1 && !Messages::prompting && validUnit) {
+	if (!Messages::prompting && validUnit) {
 		if (key == sf::Keyboard::M) {
 			SetAction("move");
 		}
@@ -356,6 +378,10 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 		}
 		else if (key == sf::Keyboard::U) {
 			SetAction("item");
+		}
+		else if (key == sf::Keyboard::C) {
+			if(menu.Construct(currentUnit))
+				menu.SetRect(sf::FloatRect(Constants::fixedView.width*0.2f, Constants::fixedView.height * 0.1f, Constants::fixedView.width*0.35f, Constants::fixedView.height*0.75f));
 		}
 		else if (key == sf::Keyboard::I) {
 			u->SwitchItem();

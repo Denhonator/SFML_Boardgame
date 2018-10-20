@@ -6,7 +6,7 @@ Main::Main()
 	sprites = new std::vector<sf::Sprite>;
 	mousePos = sf::Mouse::getPosition();
 	view = window.getView();
-	fixedView = sf::View(sf::FloatRect(0, 0, window.getSize().x*1.25f, window.getSize().y*1.25f));
+	fixedView = sf::View(sf::FloatRect(0, 0, 2400, 2400 / ((float)window.getSize().x / (float)window.getSize().y)));
 	Constants::UpdateView(fixedView);
 	Messages::UpdatePos();
 
@@ -37,7 +37,7 @@ void Main::Events()
 
 		if (event.type == sf::Event::Resized) {
 			view.setSize(sf::Vector2f(window.getSize()));
-			fixedView = sf::View(sf::FloatRect(0, 0, window.getSize().x*1.25f, window.getSize().y*1.25f));
+			fixedView = sf::View(sf::FloatRect(0, 0, 2400, 2400 / ((float)window.getSize().x / (float)window.getSize().y)));
 			Constants::UpdateView(fixedView);
 			window.setView(view);
 			mainScene.SetTileSize(window.getSize().y / mainScene.GetBoard()->boardSize.y);
@@ -81,6 +81,7 @@ void Main::Events()
 		if (event.type == sf::Event::MouseMoved) {
 			sf::Vector2i mouseDelta = sf::Vector2i(event.mouseMove.x, event.mouseMove.y) - mousePos;
 			mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
+			mainScene.SetMousePos(window.mapPixelToCoords(mousePos, fixedView));
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
 				view.move(sf::Vector2f(-mouseDelta));
 				window.setView(view);
@@ -126,12 +127,20 @@ void Main::Draw()
 			window.draw(mainScene.units.at(i).bars);
 		}
 	}
-	for (unsigned int i = 0; i < mainScene.ui.size(); i++) {
-		window.draw(mainScene.ui.at(i));
+	for (unsigned int i = 0; i < mainScene.boardUi.size(); i++) {
+		window.draw(mainScene.boardUi.at(i));
 	}
 	window.setView(fixedView);
-	for (unsigned int i = 0; i < mainScene.texts.size(); i++) {
-		window.draw(mainScene.texts.at(i));
+	if (mainScene.menu.draw) {
+		for (unsigned int i = 0; i < mainScene.menu.elements.size(); i++) {
+			window.draw(mainScene.menu.elements.at(i).sprite);
+			window.draw(mainScene.menu.elements.at(i).text);
+		}
+	}
+	else {
+		for (unsigned int i = 0; i < mainScene.texts.size(); i++) {
+			window.draw(mainScene.texts.at(i));
+		}
 	}
 	window.draw(Messages::log);
 	if(Messages::prompting)

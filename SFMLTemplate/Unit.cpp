@@ -175,6 +175,21 @@ Weapon * Unit::GetWeapon(int i)
 	return &weapons.at(i);
 }
 
+bool Unit::LevelUp(std::string a)
+{
+	if (attribute.count(a)) {
+		int req = attribute[a] * attributeGain[a];
+		if (XP >= req) {
+			XP -= req;
+			attribute[a]++;
+			UpdateBonuses();
+			UpdateBars();
+			return true;
+		}
+	}
+	return false;
+}
+
 void Unit::UpdateBonuses()
 {
 	maxAP = 8 + attribute["dexterity"];
@@ -478,6 +493,14 @@ std::string Unit::Print(bool full, bool justName)
 std::string Unit::PrintLootable()
 {
 	return std::string();
+}
+
+int Unit::GetAttribute(std::string s)
+{
+	if (attribute.count(s)) {
+		return attribute[s];
+	}
+	return 0;
 }
 
 void Unit::UpdateBars()

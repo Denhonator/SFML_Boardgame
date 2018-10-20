@@ -1,9 +1,8 @@
 #pragma once
-#include <SFML/Graphics.hpp>
-#include <stdio.h>
 #include "Time.h"
 #include "Board.h"
 #include "Unit.h"
+#include "Menu.h"
 
 class Scene
 {
@@ -25,12 +24,14 @@ public:
 	void UpdateState();
 	Board* GetBoard() { return &board; };
 	sf::Vector2i GetMouseTile() { return mouseTile; };
-	std::vector<sf::Sprite> ui;
+	void SetMousePos(sf::Vector2f p) { mousePos = p; };
+	std::vector<sf::Sprite> boardUi;
 	std::vector<sf::Sprite> tiles;
 	std::vector<Unit> units;
 	std::vector<sf::Text> texts;
 	std::vector<unsigned int> drawTiles;
 	std::vector<unsigned int> drawUnits;
+	Menu menu;
 private:
 	std::thread AI;
 	std::vector<int> AIInCombat;
@@ -45,6 +46,7 @@ private:
 	int aiUnit = -1;
 	Board board;
 	sf::Vector2i mouseTile;
+	sf::Vector2f mousePos;
 	std::vector<int> players;
 	int currentPlayer;
 	int currentUnit;
