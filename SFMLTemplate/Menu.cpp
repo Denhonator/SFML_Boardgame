@@ -29,8 +29,9 @@ bool Menu::Construct(int player)
 		this->player = -1;
 		draw = false;
 		bgs.clear();
-		elements.clear();
-		texts.clear();
+		attributes.clear();
+		attributeTexts.clear();
+		items.clear();
 		return false;
 	}
 	Unit* u = Unit::GetUnit(player);
@@ -38,15 +39,25 @@ bool Menu::Construct(int player)
 		return false;
 	this->player = player;
 	state = 0;
-	elements.clear();
-	texts.clear();
 	bgs.push_back(sf::Sprite(*Resources::GetTexture("ui/menuBG")));
 	for (int i = 0; i < Constants::attributes.size(); i++) {
-		texts.push_back(sf::Text(Constants::attributes.at(i) + ": " + std::to_string(u->GetAttribute(Constants::attributes.at(i))), *Resources::GetFont("default.ttf")));
-		elements.push_back(MenuElement(Constants::attributes.at(i), "ui/button", 1));
-		elements.at(i).text.setString(std::to_string(u->GetAtrRequirment(Constants::attributes.at(i)))+"XP");
+		attributeTexts.push_back(sf::Text(Constants::attributes.at(i) + ": " + std::to_string(u->GetAttribute(Constants::attributes.at(i))), *Resources::GetFont("default.ttf")));
+		attributes.push_back(MenuElement(Constants::attributes.at(i), "ui/button", 1));
+		attributes.at(i).text.setString(std::to_string(u->GetAtrRequirment(Constants::attributes.at(i)))+"XP");
 	}
-	texts.push_back(sf::Text("XP: " + u->PrintStats("XP"),*Resources::GetFont("default.ttf")));
+	for (int i = 0; i < u->GetWeapons()->size(); i++) {
+		items.push_back(MenuElement("weapon", u->GetWeapon(i)->inUse ? "ui/item" : "ui/button", i));
+		items.at(i).text.setString(u->GetWeapons()->at(i).Print(false,true));
+	}
+	for (int i = 0; i < u->GetEquipment()->size(); i++) {
+		items.push_back(MenuElement("equipment", u->GetEquipment()->at(i).inUse ? "ui/item" : "ui/button", i));
+		items.at(items.size() - 1).text.setString(u->GetEquipment()->at(i).Print(false, true));
+	}
+	for (int i = 0; i < u->GetItems()->size(); i++) {
+		items.push_back(MenuElement("item", "ui/button", i));
+		items.at(items.size() - 1).text.setString(u->GetItems()->at(i).Print());
+	}
+	attributeTexts.push_back(sf::Text("XP: " + u->PrintStats("XP"),*Resources::GetFont("default.ttf")));
 	return true;
 }
 
@@ -55,16 +66,23 @@ void Menu::SetRect(sf::FloatRect r)
 	rect = r;
 	bgs.at(0).setScale(sf::Vector2f(rTex.getSize().x / bgs.at(0).getLocalBounds().width, rTex.getSize().y / bgs.at(0).getLocalBounds().height));
 
-	for (int i = 0; i < elements.size(); i++) {
-		elements.at(i).SetScale(sf::Vector2f(1, 0.5f));
-		elements.at(i).CenterText(elements.at(0).text.getGlobalBounds());
-		elements.at(i).text.setStyle(sf::Text::Bold);
-		texts.at(i).setPosition(sf::Vector2f(30, 50 + i * elements.at(i).sprite.getGlobalBounds().height));
-		texts.at(i).setStyle(sf::Text::Bold);
-		elements.at(i).SetPosition(sf::Vector2f(350, 40 + i * elements.at(i).sprite.getGlobalBounds().height));
+	for (unsigned int i = 0; i < attributes.size(); i++) {
+		attributes.at(i).SetScale(sf::Vector2f(1, 0.5f));
+		attributes.at(i).CenterText(attributes.at(0).text.getGlobalBounds());
+		attributes.at(i).text.setStyle(sf::Text::Bold);
+		attributeTexts.at(i).setPosition(sf::Vector2f(30, 50 + i * attributes.at(i).sprite.getGlobalBounds().height));
+		attributeTexts.at(i).setStyle(sf::Text::Bold);
+		attributes.at(i).SetPosition(sf::Vector2f(350, 40 + i * attributes.at(i).sprite.getGlobalBounds().height));
 	}
-	texts.at(texts.size() - 1).setPosition(texts.at(texts.size() - 2).getPosition() + sf::Vector2f(20, 90));
-	texts.at(texts.size() - 1).setStyle(sf::Text::Bold);
+	attributeTexts.at(attributeTexts.size() - 1).setPosition(attributeTexts.at(attributeTexts.size() - 2).getPosition() + sf::Vector2f(20, 90));
+	attributeTexts.at(attributeTexts.size() - 1).setStyle(sf::Text::Bold);
+
+	for (unsigned int i = 0; i < items.size(); i++) {
+		items.at(i).SetScale(sf::Vector2f(4, 0.5f));
+		items.at(i).CenterText(items.at(0).text.getGlobalBounds());
+		items.at(i).text.setStyle(sf::Text::Bold);
+		items.at(i).SetPosition(sf::Vector2f(500, 40 + i * items.at(i).sprite.getGlobalBounds().height));
+	}
 	update = true;
 	draw = true;
 }
@@ -72,23 +90,26 @@ void Menu::SetRect(sf::FloatRect r)
 sf::Sprite * Menu::Draw()
 {
 	if (update) {
-		rTex.clear();
-		rTex.create(rect.width, rect.height);
+		rTex.clear(sf::Color(0,0,0,0));
+		//rTex.create(rect.width, rect.height);
 		for (unsigned int i = 0; i < bgs.size(); i++) {
 			rTex.draw(bgs.at(i));
 		}
-		for (unsigned int i = 0; i < elements.size(); i++) {
-			rTex.draw(elements.at(i).sprite);
-			rTex.draw(elements.at(i).text);
+		for (unsigned int i = 0; i < attributes.size(); i++) {
+			rTex.draw(attributes.at(i).sprite);
+			rTex.draw(attributes.at(i).text);
 		}
-		for (unsigned int i = 0; i < texts.size(); i++) {
-			rTex.draw(texts.at(i));
+		for (unsigned int i = 0; i < items.size(); i++) {
+			rTex.draw(items.at(i).sprite);
+			rTex.draw(items.at(i).text);
+		}
+		for (unsigned int i = 0; i < attributeTexts.size(); i++) {
+			rTex.draw(attributeTexts.at(i));
 		}
 		rTex.display();
 		rTexSprite.setTexture(rTex.getTexture());
 		rTexSprite.setPosition(rect.left, rect.top);
 		update = false;
-		//rTexSprite.setScale(rect.width / rTexSprite.getLocalBounds().width, rect.width / rTexSprite.getLocalBounds().width);
 	}
 	return &rTexSprite;
 }
@@ -96,4 +117,32 @@ sf::Sprite * Menu::Draw()
 sf::Vector2f Menu::GetOffset()
 {
 	return sf::Vector2f(rect.left, rect.top);
+}
+
+void Menu::Refresh()
+{
+	Unit* u = Unit::GetUnit(player);
+	if (u == nullptr)
+		return;
+	unsigned int c = 0;
+	for (int i = 0; i < Constants::attributes.size(); i++) {
+		attributes.at(i).text.setString(std::to_string(u->GetAtrRequirment(Constants::attributes.at(i))) + "XP");
+		attributeTexts.at(i).setString(Constants::attributes.at(i) + ": " + std::to_string(u->GetAttribute(Constants::attributes.at(i))));
+	}
+	for (int i = 0; i < u->GetWeapons()->size(); i++) {
+		items.at(i).text.setString(u->GetWeapons()->at(i).Print(false, true));
+		items.at(i).sprite.setTexture(u->GetWeapon(i)->inUse ? *Resources::GetTexture("ui/item") : *Resources::GetTexture("ui/button"));
+		c++;
+	}
+	for (int i = 0; i < u->GetEquipment()->size(); i++) {
+		items.at(c).text.setString(u->GetEquipment()->at(i).Print(false, true));
+		items.at(c).sprite.setTexture(u->GetEquipment()->at(i).inUse ? *Resources::GetTexture("ui/item") : *Resources::GetTexture("ui/button"));
+		c++;
+	}
+	for (int i = 0; i < u->GetItems()->size(); i++) {
+		items.at(c).text.setString(u->GetItems()->at(i).Print());
+		c++;
+	}
+	attributeTexts.at(attributeTexts.size()-1).setString("XP: " + u->PrintStats("XP"));
+	update = true;
 }

@@ -19,6 +19,7 @@ Unit::Unit(std::string name, int player, sf::Vector2i pos, std::string nick)
 	if(weapons.size()==0)
 		AddWeapon("self", 1);
 	currentWeapon = 0;
+	weapons.at(0).inUse = true;
 	currentItem = 0;
 	tile = pos;
 	sprite.setPosition(tile.x*Constants::tileSize, tile.y*Constants::tileSize);
@@ -93,6 +94,8 @@ void Unit::AddItem(std::string name, int level, int count)
 
 bool Unit::SwitchWeapon(int i)
 {
+	if (i == currentWeapon)
+		return false;
 	if (AP < 2 || weapons.size()==1) {
 		if (AP < 2)
 			Messages::Notice("Not enough AP to switch weapon");
@@ -100,6 +103,7 @@ bool Unit::SwitchWeapon(int i)
 			Messages::Notice("You only have one weapon");
 		return false;
 	}
+	weapons.at(currentWeapon).inUse = false;
 	if (i >= 0 && i < weapons.size())
 		currentWeapon = i;
 	else {
@@ -108,6 +112,8 @@ bool Unit::SwitchWeapon(int i)
 			currentWeapon = 0;
 	}
 	AP -= 2;
+	weapons.at(currentWeapon).inUse = true;
+	Messages::Add(nick + " equipped " + weapons.at(currentWeapon).Print(false, true));
 	UpdateBars();
 	return true;
 }
@@ -117,6 +123,7 @@ bool Unit::Unequip(int i, int slot, bool quiet)
 	if (!equipment.at(i).inUse||(AP<2&&!quiet))
 		return false;
 	AP -= 2;
+	UpdateBars();
 	equipment.at(i).inUse = false;
 	equipSlot.erase(equipment.at(i).GetType() + std::to_string(equipment.at(i).currentSlot));
 	if(!quiet)
@@ -220,6 +227,7 @@ int Unit::Distance(sf::Vector2i a, sf::Vector2i b) {
 bool Unit::TransferWeapon(Unit * from, Unit * to, int index)
 {
 	if (from->weapons.size() > index&&index >= 0) {
+		from->weapons.at(index).inUse = false;
 		to->weapons.push_back(from->weapons.at(index));
 		Messages::Add(to->nick + " looted " + from->weapons.at(index).Print(false, true) + " from " + from->nick);
 		from->weapons.erase(from->weapons.begin() + index);
@@ -306,9 +314,11 @@ Unit* Unit::ChooseBodyFrom(sf::Vector2i pos)
 
 bool Unit::LootFrom(sf::Vector2i pos)
 {
-	if (Distance(pos, tile) < 2) {
+	if (Distance(pos, tile) < 2 && AP>=2) {
 		Unit* u = ChooseBodyFrom(pos);
 		if (u != nullptr) {
+			AP -= 2;
+			UpdateBars();
 			while (LootFrom(u)) {
 				;
 			}

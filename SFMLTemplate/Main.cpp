@@ -32,8 +32,9 @@ void Main::Events()
 	sf::Event event;
 	while (window.pollEvent(event))
 	{
-		if (event.type == sf::Event::Closed)
+		if (event.type == sf::Event::Closed) {
 			window.close();
+		}
 
 		if (event.type == sf::Event::Resized) {
 			view.setSize(sf::Vector2f(window.getSize()));

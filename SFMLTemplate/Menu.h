@@ -9,11 +9,13 @@ public:
 	~Menu();
 	bool Construct(int player);
 	void SetRect(sf::FloatRect r);
-	std::vector<MenuElement> elements;
-	std::vector<sf::Text> texts;
+	std::vector<MenuElement> attributes;
+	std::vector<MenuElement> items;
+	std::vector<sf::Text> attributeTexts;
 	std::vector<sf::Sprite> bgs;
 	sf::Sprite* Draw();
 	sf::Vector2f GetOffset();
+	void Refresh();
 	int player;
 	int state;
 	bool draw;

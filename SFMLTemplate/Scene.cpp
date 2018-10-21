@@ -312,14 +312,16 @@ void Scene::Click()
 	bool validUnit = u != nullptr && u->player == currentPlayer;
 
 	if (menu.state>=0 && menu.player>=0) {
+		bool update = false;
 		u = FindUnit(menu.player);
 		validUnit = u != nullptr;
-		for (int i = 0; i < menu.elements.size(); i++) {
-			if (menu.elements.at(i).sprite.getGlobalBounds().contains(mousePos-menu.GetOffset())) {
-				if (validUnit) {
-					if (Resources::StrInVector(menu.elements.at(i).name, Constants::attributes)&&menu.elements.at(i).value==1) {
-						if (u->LevelUp(menu.elements.at(i).name)) {
+		if (validUnit) {
+			for (unsigned int i = 0; i < menu.attributes.size(); i++) {
+				if (menu.attributes.at(i).sprite.getGlobalBounds().contains(mousePos - menu.GetOffset())) {
+					if (menu.attributes.at(i).value == 1) {
+						if (u->LevelUp(menu.attributes.at(i).name)) {
 							Messages::Add(u->Print(false, true) + " leveled up!");
+							update = true;
 						}
 						else {
 							Messages::Notice("Not enough XP");
@@ -327,6 +329,33 @@ void Scene::Click()
 					}
 				}
 			}
+			for (unsigned int i = 0; i < menu.items.size(); i++) {
+				if (menu.items.at(i).sprite.getGlobalBounds().contains(mousePos - menu.GetOffset())) {
+					if (menu.items.at(i).name == "weapon" && menu.items.at(i).value>=0) {
+						if (u->SwitchWeapon(menu.items.at(i).value)) {
+							update = true;
+							if (!combat)
+								EndTurn();
+						}
+					}
+					if (menu.items.at(i).name == "equipment" && menu.items.at(i).value >= 0) {
+						if (u->Equip(menu.items.at(i).value)) {
+							update = true;
+							if (!combat)
+								EndTurn();
+						}
+					}
+					if (menu.items.at(i).name == "item" && menu.items.at(i).value >= 0) {
+						currentAction = "item";
+						u->SwitchItem(menu.items.at(i).value);
+						menu.Construct(currentUnit);
+					}
+				}
+			}
+		}
+		if (update) {
+			update = false;
+			menu.Refresh();
 		}
 		return;
 	}
@@ -346,10 +375,14 @@ void Scene::Click()
 		else if (currentAction == "loot") {
 			if (!u->LootFrom(mouseTile))
 				Messages::Notice("Nothing to loot there");
+			else if (!combat)
+				EndTurn();
 		}
 		else if (currentAction == "item") {
 			if (!u->UseItem(mouseTile))
 				Messages::Notice("Invalid item usage");
+			else if (!combat)
+				EndTurn();
 		}
 	}
 	else {
@@ -381,7 +414,7 @@ void Scene::KeyPress(sf::Keyboard::Key key)
 		}
 		else if (key == sf::Keyboard::C) {
 			if(menu.Construct(currentUnit))
-				menu.SetRect(sf::FloatRect(Constants::fixedView.width*0.2f, Constants::fixedView.height * 0.1f, Constants::fixedView.width*0.35f, Constants::fixedView.height*0.75f));
+				menu.SetRect(sf::FloatRect(Constants::fixedView.width*0.2f, Constants::fixedView.height * 0.1f, Constants::fixedView.width*0.6f, Constants::fixedView.height*0.75f));
 		}
 		else if (key == sf::Keyboard::I) {
 			u->SwitchItem();

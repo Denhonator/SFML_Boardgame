@@ -11,6 +11,7 @@ public:
 	void SwitchAttack(int i = -1);
 	Attack GetAttack(int i = -1);
 	bool CanUse(std::map<std::string, int> attributes);
+	bool inUse;
 private:
 	int owner;
 	std::string name;

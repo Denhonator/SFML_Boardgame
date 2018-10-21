@@ -7,6 +7,7 @@ Weapon::Weapon(std::string name, int level, int owner)
 	this->name = name;
 	baseDamage = level + 1;
 	currentAttack = 0;
+	inUse = false;
 	std::vector<std::string> info = Resources::GetText("weapons/" + name);
 	std::string buffer = "";
 	for (int i = 0; i < info.size(); i++) {

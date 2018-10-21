@@ -29,7 +29,6 @@ public:
 	void AddEquipment(std::string name, int level);
 	void AddItem(std::string name, int level, int count);
 	bool SwitchWeapon(int i = -1);
-	bool Unequip(int i, int slot = 0, bool quiet = false);
 	bool Equip(int i, int slot = 0, bool quiet = false);
 	bool SwitchItem(int i = -1);
 	Weapon* GetWeapon(int i = -1);
@@ -40,6 +39,9 @@ public:
 	std::string Print(bool full = false, bool justName = false);
 	std::string PrintStats(sf::String arg);
 	std::string PrintLootable();
+	std::vector<Weapon>* GetWeapons() { return &weapons; };
+	std::vector<Item>* GetItems() { return &items; };
+	std::vector<Equipment>* GetEquipment() { return &equipment; };
 	int GetAttribute(std::string s);
 	int GetAtrRequirment(std::string s);
 	void UpdateBars();
@@ -51,6 +53,7 @@ public:
 	static std::vector<Unit>* unit;
 	bool removed = false;
 private:
+	bool Unequip(int i, int slot = 0, bool quiet = false);
 	Unit* ChooseBodyFrom(sf::Vector2i pos);
 	int pushedBy = -1;
 	static int unitCount;
