@@ -490,6 +490,14 @@ std::string Unit::Print(bool full, bool justName)
 	return buffer;
 }
 
+std::string Unit::PrintStats(sf::String arg)
+{
+	if (arg.find("XP") != sf::String::InvalidPos) {
+		return std::to_string(XP);
+	}
+	return "";
+}
+
 std::string Unit::PrintLootable()
 {
 	return std::string();
@@ -501,6 +509,14 @@ int Unit::GetAttribute(std::string s)
 		return attribute[s];
 	}
 	return 0;
+}
+
+int Unit::GetAtrRequirment(std::string s)
+{
+	if (attribute.count(s)) {
+		return attribute[s] * attributeGain[s];
+	}
+	return -1;
 }
 
 void Unit::UpdateBars()

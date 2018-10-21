@@ -10,7 +10,7 @@ public:
 	~MenuElement();
 	void SetPosition(sf::Vector2f pos);
 	void SetScale(sf::Vector2f scale);
-	void CenterText();
+	void CenterText(sf::FloatRect bounds);
 	sf::Sprite sprite;
 	sf::Text text;
 	std::string name;

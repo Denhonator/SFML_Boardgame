@@ -28,14 +28,13 @@ void MenuElement::SetPosition(sf::Vector2f pos)
 void MenuElement::SetScale(sf::Vector2f scale)
 {
 	sprite.setScale(scale);
-	CenterText();
 }
 
-void MenuElement::CenterText()
+void MenuElement::CenterText(sf::FloatRect bounds)
 {
 	if (text.getString().getSize()) {
-		text.setScale(0.4f*sprite.getGlobalBounds().height / text.getGlobalBounds().height, 0.4f*sprite.getGlobalBounds().height / text.getGlobalBounds().height);
-		text.setPosition(std::max(sprite.getPosition().x + sprite.getGlobalBounds().width/2-text.getGlobalBounds().width/2,sprite.getPosition().x),
-			sprite.getPosition().y + sprite.getGlobalBounds().height / 2 - text.getGlobalBounds().height);
+		text.setPosition(sprite.getPosition().x+15,
+			sprite.getPosition().y + sprite.getGlobalBounds().height / 2 - bounds.height);
+		//text.setScale(0.4f*sprite.getGlobalBounds().width / text.getGlobalBounds().width, 0.4f*sprite.getGlobalBounds().width / text.getGlobalBounds().width);
 	}
 }

@@ -132,10 +132,7 @@ void Main::Draw()
 	}
 	window.setView(fixedView);
 	if (mainScene.menu.draw) {
-		for (unsigned int i = 0; i < mainScene.menu.elements.size(); i++) {
-			window.draw(mainScene.menu.elements.at(i).sprite);
-			window.draw(mainScene.menu.elements.at(i).text);
-		}
+		window.draw(*mainScene.menu.Draw());
 	}
 	else {
 		for (unsigned int i = 0; i < mainScene.texts.size(); i++) {

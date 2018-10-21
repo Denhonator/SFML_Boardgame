@@ -38,8 +38,10 @@ public:
 	bool Dead() { return HP <= 0; };
 	void EndOfTurn();
 	std::string Print(bool full = false, bool justName = false);
+	std::string PrintStats(sf::String arg);
 	std::string PrintLootable();
 	int GetAttribute(std::string s);
+	int GetAtrRequirment(std::string s);
 	void UpdateBars();
 	int player;
 	int id;

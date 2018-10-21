@@ -315,7 +315,7 @@ void Scene::Click()
 		u = FindUnit(menu.player);
 		validUnit = u != nullptr;
 		for (int i = 0; i < menu.elements.size(); i++) {
-			if (menu.elements.at(i).sprite.getGlobalBounds().contains(mousePos)) {
+			if (menu.elements.at(i).sprite.getGlobalBounds().contains(mousePos-menu.GetOffset())) {
 				if (validUnit) {
 					if (Resources::StrInVector(menu.elements.at(i).name, Constants::attributes)&&menu.elements.at(i).value==1) {
 						if (u->LevelUp(menu.elements.at(i).name)) {
