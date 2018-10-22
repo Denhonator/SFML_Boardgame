@@ -10,12 +10,14 @@ public:
 	~Board();
 	void InsertTile(unsigned short x, unsigned short y, Tile tile);
 	void Randomize();
+	bool CheckLOS(int x1, int y1, int x2, int y2);
 	void SetTileSize(float size);
 	float GetTileSize();
 	Tile GetTile(unsigned short x, unsigned short y);
 	sf::Vector2i boardSize;
 	bool refresh;
 	sf::RenderTexture* GetTexture(bool refresh = false);
+	sf::VertexArray debug;
 private:
 	void MakeRoom(short x1, short x2, short y1, short y2, short chance);
 	float tileSize;

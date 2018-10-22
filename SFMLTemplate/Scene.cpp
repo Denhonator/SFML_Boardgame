@@ -133,7 +133,7 @@ void Scene::SetCombat(bool val)
 	combat = val;
 }
 
-std::vector<sf::Sprite>* Scene::Update()
+void Scene::Update()
 {
 	if (currentPlayer == 0 && players.size()>1) {
 		if (aiUnit == -1) {
@@ -164,24 +164,34 @@ std::vector<sf::Sprite>* Scene::Update()
 		AIReady = false;
 	}
 	if (board.refresh) {
+		for (unsigned int i = 0; i < playerUnits.size(); i++) {
+			Unit* u = FindUnit(playerUnits.at(i));
+			if (u != nullptr) {
+				for (unsigned int x = 0; x < board.boardSize.x; x++) {
+					for (unsigned int y = 0; y < board.boardSize.y; y++) {
+						Tile::tileRef[x][y].seen = board.CheckLOS(u->tile.x, u->tile.y, x, y);
+					}
+				}
+			}
+		}
 		tiles.at(0).setTexture(board.GetTexture(board.refresh)->getTexture());
 		board.refresh = false;
 	}
 	if (update)
 		UpdateState();
-	return &tiles;
 }
 
 void Scene::AddTile(sf::Sprite * spr)
 {
 	tiles.push_back(*spr);
-	drawTiles.push_back(tiles.size() - 1);
 }
 
 void Scene::AddUnit(Unit * unit)
 {
 	units.push_back(*unit);
-	//drawUnits.push_back(units.size() - 1);
+	if (unit->player == 1) {
+		playerUnits.push_back(unit->id);
+	}
 	bool found = false;
 	for (int i = 0; i < players.size(); i++) {
 		if (unit->player == players.at(i))
@@ -236,7 +246,7 @@ Unit * Scene::FindUnit(int id)
 void Scene::SetUnit(int id)
 {
 	Unit* u = FindUnit(id);
-	if (u!=nullptr && FindUnit(id)->player == currentPlayer) {
+	if (u!=nullptr && FindUnit(id)->player == currentPlayer && currentPlayer>0) {
 		currentUnit = id;
 		update = true;
 	}
@@ -365,8 +375,11 @@ void Scene::Click()
 	
 	if (currentUnit != -1 && !Messages::prompting && validUnit) {
 		if (currentAction == "move") {
-			if (u->MoveTo(mouseTile)&&!combat)
-				EndTurn();
+			if (u->MoveTo(mouseTile)) {
+				if(!combat)
+					EndTurn();
+				board.refresh = true;
+			}
 		}
 		else if (currentAction == "attack") {
 			if (u->AttackTo(mouseTile) && !combat)

@@ -119,11 +119,11 @@ void Main::FixedUpdate()
 void Main::Draw()
 {
 	window.clear();
-	for (unsigned int i = 0; i < mainScene.drawTiles.size(); i++) {
-		window.draw(mainScene.tiles.at(mainScene.drawTiles.at(i)));
+	for (unsigned int i = 0; i < mainScene.tiles.size(); i++) {
+		window.draw(mainScene.tiles.at(i));
 	}
 	for (unsigned int i = 0; i < mainScene.units.size(); i++) {
-		if (!mainScene.units.at(i).Dead()) {
+		if (!mainScene.units.at(i).Dead()&&Tile::tileRef[mainScene.units.at(i).tile.x][mainScene.units.at(i).tile.y].seen) {
 			window.draw(mainScene.units.at(i).sprite);
 			window.draw(mainScene.units.at(i).bars);
 		}
@@ -131,6 +131,8 @@ void Main::Draw()
 	for (unsigned int i = 0; i < mainScene.boardUi.size(); i++) {
 		window.draw(mainScene.boardUi.at(i));
 	}
+	window.draw(mainScene.GetBoard()->debug);
+
 	window.setView(fixedView);
 	if (mainScene.menu.draw) {
 		window.draw(*mainScene.menu.Draw());

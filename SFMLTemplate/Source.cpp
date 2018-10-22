@@ -10,7 +10,7 @@ void FixedLoop(Main* game) {
 			game->FixedUpdate();
 		}
 		else {
-			sf::sleep(sf::milliseconds(1));
+			sf::sleep(sf::milliseconds(2));
 		}
 	}
 }

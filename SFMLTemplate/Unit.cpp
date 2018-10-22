@@ -487,9 +487,10 @@ std::string Unit::Print(bool full, bool justName)
 		"\nMP: " + std::to_string(MP) + "/" + std::to_string(maxMP);
 
 	if(full) {
-		buffer += +"\n" + weapons.at(currentWeapon).Print() +
-			"\nItem: " + items.at(currentItem).Print() +
-			"\nArmor: " + std::to_string(armor.physical) + "," +
+		buffer += "\n" + weapons.at(currentWeapon).Print();
+		if(items.size())
+			buffer += "\nItem: " + items.at(currentItem).Print();
+		buffer += "\nArmor: " + std::to_string(armor.physical) + "," +
 			std::to_string(armor.fire) + "," +
 			std::to_string(armor.ice) + "," +
 			std::to_string(armor.lightning) +

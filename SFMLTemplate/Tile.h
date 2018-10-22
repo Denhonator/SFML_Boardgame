@@ -12,5 +12,5 @@ public:
 	static Tile* tileRef[Constants::boardSize];
 	int unit;
 	std::vector<int> otherUnits;
+	bool seen = false;
 };
-

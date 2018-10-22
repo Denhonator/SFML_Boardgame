@@ -9,7 +9,7 @@ class Scene
 public:
 	Scene();
 	~Scene();
-	std::vector<sf::Sprite>* Update();
+	void Update();
 	void AddTile(sf::Sprite* spr);
 	void AddUnit(Unit* unit);
 	void RemoveUnit(unsigned int i);
@@ -29,8 +29,7 @@ public:
 	std::vector<sf::Sprite> tiles;
 	std::vector<Unit> units;
 	std::vector<sf::Text> texts;
-	std::vector<unsigned int> drawTiles;
-	std::vector<unsigned int> drawUnits;
+	std::vector<unsigned int> playerUnits;
 	Menu menu;
 private:
 	std::thread AI;
