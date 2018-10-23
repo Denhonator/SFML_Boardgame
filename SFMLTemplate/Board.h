@@ -10,7 +10,7 @@ public:
 	~Board();
 	void InsertTile(unsigned short x, unsigned short y, Tile tile);
 	void Randomize();
-	bool CheckLOS(int x1, int y1, int x2, int y2);
+	bool CheckLOS(int x1, int y1, int x2, int y2, bool visual=false);
 	void SetTileSize(float size);
 	float GetTileSize();
 	Tile GetTile(unsigned short x, unsigned short y);

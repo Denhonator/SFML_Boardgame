@@ -57,7 +57,7 @@ void Board::Randomize()
 	}
 }
 
-bool Board::CheckLOS(int x1, int y1, int x2, int y2)
+bool Board::CheckLOS(int x1, int y1, int x2, int y2, bool visual)
 {
 	float off = 0.01f;
 	std::vector<sf::Vector2f> testPoints = { sf::Vector2f(x1+off,y1+off), sf::Vector2f(x1+1-off,y1+off), sf::Vector2f(x1+off,y1+1-off), sf::Vector2f(x1+1-off,y1+1-off) };
@@ -78,11 +78,13 @@ bool Board::CheckLOS(int x1, int y1, int x2, int y2)
 			dir = sf::Vector2f((dest.x - ray.x) / length, (dest.y - ray.y) / length);
 			add = sf::Vector2f(dir.x*speed, dir.y*speed);
 
-			sf::Vertex buffer = sf::Vertex(sf::Vector2f(ray.x*Constants::tileSize, ray.y*Constants::tileSize), sf::Color(255, 0, 0, 255));
+			loops = length / speed;
 
 			for (unsigned int l = 0; l <= loops; l++) {
 				if ((int)ray.x < 0 || (int)ray.x >= Constants::boardSize || (int)ray.y < 0 || (int)ray.y >= Constants::boardSize)
 					break;
+				if (visual)
+					tiles[(int)ray.x][(int)ray.y].seen = true;
 				if ((int)ray.x == (int)dest.x && (int)ray.y == (int)dest.y) {
 					return true;
 				}

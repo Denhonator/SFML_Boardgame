@@ -131,7 +131,7 @@ void Main::Draw()
 	for (unsigned int i = 0; i < mainScene.boardUi.size(); i++) {
 		window.draw(mainScene.boardUi.at(i));
 	}
-	window.draw(mainScene.GetBoard()->debug);
+	//window.draw(mainScene.GetBoard()->debug);
 
 	window.setView(fixedView);
 	if (mainScene.menu.draw) {

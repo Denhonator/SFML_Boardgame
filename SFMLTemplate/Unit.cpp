@@ -29,6 +29,7 @@ Unit::Unit(std::string name, int player, sf::Vector2i pos, std::string nick)
 	AP = maxAP;
 	HP = maxHP;
 	MP = maxMP;
+	visionRange = 8;
 	UpdateBars();
 }
 

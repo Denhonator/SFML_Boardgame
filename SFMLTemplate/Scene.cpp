@@ -100,7 +100,7 @@ int Scene::AIFindTarget()
 		if (units.at(i).player == 0)
 			continue;
 		int newDist = Unit::Distance(units.at(aiUnit).tile, units.at(i).tile);
-		if (newDist < dist && !units.at(i).Dead()) {
+		if (newDist < dist && !units.at(i).Dead() && board.CheckLOS(units.at(aiUnit).tile.x,units.at(aiUnit).tile.y,units.at(i).tile.x,units.at(i).tile.y)) {
 			dist = newDist;
 			index = i;
 		}
@@ -164,12 +164,19 @@ void Scene::Update()
 		AIReady = false;
 	}
 	if (board.refresh) {
+		for (unsigned int x = 0; x < board.boardSize.x; x++) {
+			for (unsigned int y = 0; y < board.boardSize.y; y++) {
+				Tile::tileRef[x][y].seen = false;
+			}
+		}
 		for (unsigned int i = 0; i < playerUnits.size(); i++) {
 			Unit* u = FindUnit(playerUnits.at(i));
 			if (u != nullptr) {
 				for (unsigned int x = 0; x < board.boardSize.x; x++) {
 					for (unsigned int y = 0; y < board.boardSize.y; y++) {
-						Tile::tileRef[x][y].seen = board.CheckLOS(u->tile.x, u->tile.y, x, y);
+						int dist = std::abs((int)x - u->tile.x) + std::abs((int)y - u->tile.y);
+						if(dist <= u->GetVisionRange() && (dist==u->GetVisionRange()||dist==7||x==0||y==0||x==board.boardSize.x-1||y==board.boardSize.y-1))
+							board.CheckLOS(u->tile.x, u->tile.y, x, y, true);
 					}
 				}
 			}

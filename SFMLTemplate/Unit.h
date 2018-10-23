@@ -44,6 +44,7 @@ public:
 	std::vector<Equipment>* GetEquipment() { return &equipment; };
 	int GetAttribute(std::string s);
 	int GetAtrRequirment(std::string s);
+	int GetVisionRange() { return visionRange; };
 	void UpdateBars();
 	int player;
 	int id;
@@ -64,6 +65,7 @@ private:
 	int maxMP, MP;
 	int XP;
 	int tohit, tocast, criticalHit, criticalFail, luckBonus, charBonus;
+	int visionRange;
 	int currentWeapon, currentItem;
 	std::vector<Weapon> weapons;
 	std::vector<Item> items;
