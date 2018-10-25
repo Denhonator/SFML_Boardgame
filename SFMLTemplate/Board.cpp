@@ -98,6 +98,84 @@ bool Board::CheckLOS(int x1, int y1, int x2, int y2, bool visual)
 	return false;
 }
 
+std::vector<sf::Vector2i> Board::FindPath(sf::Vector2i from, sf::Vector2i to)
+{
+	std::vector<sf::Vector2i> finalPath;
+	std::vector<sf::Vector2i> open;
+	std::vector<sf::Vector2i> closed = { from };
+	std::vector<sf::Vector2i> voffs = Resources::Voffs(true);
+	sf::Vector2i temp;
+	int closedIndex = 0;
+	int openIndex = 0;
+	float dist = 999;
+	float tempDist = 999;
+	bool found = false;
+
+	do {
+		for (unsigned int i = 0; i < voffs.size(); i++) {	//Add to open from closed at index
+			if (voffs.at(i).x||voffs.at(i).y) {
+				temp = closed.at(closedIndex) + voffs.at(i);
+				if (std::find(closed.begin(), closed.end(), temp) != closed.end() || std::find(open.begin(), open.end(), temp) != open.end())	//Don't add what's in a list already
+					continue;
+				if (temp.x >= 0 && temp.y >= 0 && temp.x < Constants::boardSize&&temp.y < Constants::boardSize&&tiles[temp.x][temp.y].sprite != "0")	//Only valid and walkable squares
+					open.push_back(temp);
+			}
+		}
+		dist = 999;
+		tempDist = 999;
+		for (unsigned int i = 0; i < open.size(); i++) {	//Pick estimated closest and add to closed list
+			if (open.at(i) == to) {
+				openIndex = i;
+				found = true;
+				break;
+			}
+			temp = sf::Vector2i(to.x - open.at(i).x, to.y - open.at(i).y);			//TODO keep track of cost so far to make better decisions
+			tempDist = std::sqrt(temp.x*temp.x + temp.y*temp.y);
+			//tempDist = std::abs(temp.x) + std::abs(temp.y);
+			if (tempDist < dist) {
+				dist = tempDist;
+				openIndex = i;
+			}
+		}
+		closed.push_back(open.at(openIndex));
+		open.erase(open.begin() + openIndex);
+		closedIndex++;
+	} while (open.size()&&!found);
+	if (found) {
+		found = false;
+		closedIndex = closed.size() - 1;
+		do {													//Return through fastest path
+			dist = 999;
+			tempDist = 999;
+			finalPath.push_back(closed.at(closedIndex));
+			closed.erase(closed.begin() + closedIndex, closed.end());
+			for (int i = closed.size()-1; i >= 0; i--) {
+				temp = sf::Vector2i(closed.at(i).x - finalPath.at(finalPath.size() - 1).x, closed.at(i).y - finalPath.at(finalPath.size() - 1).y);
+				if (closed.at(i) == from && std::abs(temp.x)<2 && std::abs(temp.y)<2) {
+					finalPath.push_back(closed.at(i));
+					found = true;
+					break;
+				}
+				if (std::abs(temp.x) == 1 && std::abs(temp.y) == 1) {	//Ignore diagonal between walls
+					if (tiles[closed.at(i).x - temp.x][closed.at(i).y].sprite == "0"&&tiles[closed.at(i).x][closed.at(i).y - temp.y].sprite == "0")
+						continue;
+				}
+				if (std::abs(temp.x) + std::abs(temp.y) == 1 || (std::abs(temp.x) == 1 && std::abs(temp.y) == 1)) {	//Pick one that brings closest
+					temp = sf::Vector2i(from.x - closed.at(i).x, from.y - closed.at(i).y);
+					tempDist = std::sqrt(temp.x*temp.x + temp.y*temp.y);
+					if (tempDist < dist) {
+						dist = tempDist;
+						closedIndex = i;
+					}
+				}
+			}
+		} while (!found);
+	}
+	if (finalPath.size())
+		std::reverse(finalPath.begin(), finalPath.end());
+	return finalPath;
+}
+
 void Board::SetTileSize(float size)
 {
 	if(size!=tileSize)

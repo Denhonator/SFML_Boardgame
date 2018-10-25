@@ -2,7 +2,7 @@
 
 sf::RectangleShape Console::bg;
 sf::Text Console::input;
-std::string Console::previous = "unit,swordguy,2";
+std::string Console::previous = "path,0,0,4,0";
 bool Console::enable = false;
 
 Console::Console()
@@ -64,7 +64,20 @@ void Console::Command(Scene* scene)
 				Messages::Notice("Unit added");
 			}
 			catch(const std::exception& e){
-				Messages::Notice("Could not parse unit");
+				Messages::Notice(e.what());
+			}
+		}
+		if (args.at(0) == "path") {
+			try {
+				std::vector<sf::Vector2i> path = scene->GetBoard()->FindPath(sf::Vector2i(std::stoi(std::string(args.at(1))), std::stoi(std::string(args.at(2)))),
+					sf::Vector2i(std::stoi(std::string(args.at(3))), std::stoi(std::string(args.at(4)))));
+				for (unsigned int i = 0; i < path.size(); i++) {
+					printf("%d,%d\n", path.at(i).x, path.at(i).y);
+				}
+				printf("\n");
+			}
+			catch (const std::exception& e) {
+				Messages::Notice(e.what());
 			}
 		}
 		input.setString("");

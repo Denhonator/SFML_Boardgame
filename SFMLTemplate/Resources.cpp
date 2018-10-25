@@ -6,6 +6,7 @@ std::map<std::string, sf::SoundBuffer> Resources::sound;
 std::vector<sf::Sound> Resources::player;
 int Resources::roll = 0;
 std::vector <sf::Vector2i> Resources::voffs = {sf::Vector2i(0,0),sf::Vector2i(-1,0) ,sf::Vector2i(0,-1) ,sf::Vector2i(1,0) ,sf::Vector2i(0,1) ,sf::Vector2i(1,1) ,sf::Vector2i(-1,-1) ,sf::Vector2i(1,-1) ,sf::Vector2i(-1,1) };
+std::vector <sf::Vector2i> Resources::nondVoffs = { sf::Vector2i(0,0),sf::Vector2i(-1,0) ,sf::Vector2i(0,-1) ,sf::Vector2i(1,0) ,sf::Vector2i(0,1) };
 
 void Resources::RollerFunction() {
 	srand(time(NULL));
@@ -145,9 +146,11 @@ int Resources::Roll()
 	return roll;
 }
 
-std::vector<sf::Vector2i> Resources::Voffs()
+std::vector<sf::Vector2i> Resources::Voffs(bool nond)
 {
 	std::vector<sf::Vector2i> t = voffs;
+	if (nond)
+		t = nondVoffs;
 	std::vector<sf::Vector2i> r;
 	r.push_back(t.at(0));
 	t.erase(t.begin());

@@ -49,6 +49,7 @@ public:
 	int player;
 	int id;
 	sf::Vector2i tile;
+	std::vector<sf::Vector2i> currentPath;
 	sf::Sprite sprite;
 	sf::VertexArray bars;
 	static std::vector<Unit>* unit;
