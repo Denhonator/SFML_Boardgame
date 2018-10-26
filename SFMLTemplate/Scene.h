@@ -25,6 +25,7 @@ public:
 	Board* GetBoard() { return &board; };
 	sf::Vector2i GetMouseTile() { return mouseTile; };
 	void SetMousePos(sf::Vector2f p) { mousePos = p; };
+	sf::VertexArray boardUiV;
 	std::vector<sf::Sprite> boardUi;
 	std::vector<sf::Sprite> tiles;
 	std::vector<Unit> units;

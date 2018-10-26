@@ -33,6 +33,7 @@ private:
 	bool running;
 	static std::vector <sf::Vector2i> voffs;
 	static std::vector <sf::Vector2i> nondVoffs;
+	static int voffsIndex, nondVoffsIndex;
 };
 
 struct Damage {

@@ -5,6 +5,8 @@ std::map<std::string, sf::Font> Resources::font = {};
 std::map<std::string, sf::SoundBuffer> Resources::sound;
 std::vector<sf::Sound> Resources::player;
 int Resources::roll = 0;
+int Resources::voffsIndex = 0;
+int Resources::nondVoffsIndex = 0;
 std::vector <sf::Vector2i> Resources::voffs = {sf::Vector2i(0,0),sf::Vector2i(-1,0) ,sf::Vector2i(0,-1) ,sf::Vector2i(1,0) ,sf::Vector2i(0,1) ,sf::Vector2i(1,1) ,sf::Vector2i(-1,-1) ,sf::Vector2i(1,-1) ,sf::Vector2i(-1,1) };
 std::vector <sf::Vector2i> Resources::nondVoffs = { sf::Vector2i(0,0),sf::Vector2i(-1,0) ,sf::Vector2i(0,-1) ,sf::Vector2i(1,0) ,sf::Vector2i(0,1) };
 
@@ -20,6 +22,8 @@ Resources::Resources()
 {
 	running = true;
 	roller = std::thread(&Resources::RollerFunction, this);
+	voffsIndex = 0;
+	nondVoffsIndex = 0;
 }
 
 Resources::~Resources()
@@ -149,13 +153,26 @@ int Resources::Roll()
 std::vector<sf::Vector2i> Resources::Voffs(bool nond)
 {
 	std::vector<sf::Vector2i> t = voffs;
-	if (nond)
+	unsigned int x = 0;
+	if (nond) {			//Changes starting point each time
 		t = nondVoffs;
+		nondVoffsIndex++;
+		if (nondVoffsIndex >= nondVoffs.size())
+			nondVoffsIndex = 0;
+		x = nondVoffsIndex;
+	}
+	else {
+		voffsIndex++;
+		if (voffsIndex >= voffs.size())
+			voffsIndex = 0;
+		x = voffsIndex;
+	}
 	std::vector<sf::Vector2i> r;
 	r.push_back(t.at(0));
 	t.erase(t.begin());
-	while (t.size() > 0) {
-		int x = roll % t.size();
+	
+	while (t.size() > 0) {			
+		x = x >= t.size() ? 0 : x;
 		r.push_back(t.at(x));
 		t.erase(t.begin() + x);
 	}

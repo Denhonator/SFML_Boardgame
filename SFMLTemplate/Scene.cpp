@@ -25,6 +25,7 @@ Scene::Scene()
 	currentAction = "";
 	players = { 1 };
 	menu = Menu(-1, -1);
+	boardUiV.setPrimitiveType(sf::PrimitiveType::LineStrip);
 	UpdateState();
 }
 
@@ -235,6 +236,13 @@ void Scene::MouseHover(sf::Vector2i pos)
 		texts.at(5).setString(board.GetTile(mouseTile.x, mouseTile.y).Print());
 		Unit* u = Unit::GetUnit(board.GetTile(mouseTile.x,mouseTile.y).unit);
 		texts.at(6).setString(u != nullptr ? u->Print() : "");
+		if (currentUnit >= 0) {
+			std::vector<sf::Vector2i> path = board.FindPath(FindUnit(currentUnit)->tile, mouseTile);
+			boardUiV.clear();
+			for (unsigned int i = 0; i < path.size(); i++) {
+				boardUiV.append(sf::Vertex(sf::Vector2f(path.at(i).x*Constants::tileSize+Constants::tileSize/2, path.at(i).y*Constants::tileSize+Constants::tileSize/2), sf::Color(255, 50, 50, 255)));
+			}
+		}
 	}
 }
 
