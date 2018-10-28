@@ -100,7 +100,7 @@ bool Board::CheckLOS(int x1, int y1, int x2, int y2, bool visual)
 
 std::vector<sf::Vector2i> Board::FindPath(sf::Vector2i from, sf::Vector2i to)	//A* algorithm
 {
-	if (to.x<0 || to.y<0 || to.x>Constants::boardSize || to.y>Constants::boardSize || tiles[to.x][to.y].sprite == "0")
+	if (to.x<0 || to.y<0 || to.x>Constants::boardSize || to.y>Constants::boardSize || tiles[to.x][to.y].sprite == "0" || tiles[to.x][to.y].unit>=0)
 		return std::vector<sf::Vector2i>();
 	std::vector<sf::Vector2i> finalPath;
 	std::vector<sf::Vector2i> open;
@@ -121,7 +121,7 @@ std::vector<sf::Vector2i> Board::FindPath(sf::Vector2i from, sf::Vector2i to)	//
 				temp = closed.at(closedIndex) + voffs.at(i);
 				if (std::find(closed.begin(), closed.end(), temp) != closed.end() || std::find(open.begin(), open.end(), temp) != open.end()	//Don't add what's in a list already
 					|| temp.x < 0 || temp.y < 0 || temp.x >= Constants::boardSize || temp.y >= Constants::boardSize								//Only valid and walkable squares
-					|| tiles[temp.x][temp.y].sprite == "0"
+					|| tiles[temp.x][temp.y].sprite == "0" || tiles[temp.x][temp.y].unit >= 0
 					|| (tiles[closed.at(closedIndex).x + voffs.at(i).x][closed.at(closedIndex).y].sprite == "0"									//Don't cross diagonally between two walls
 						&& tiles[closed.at(closedIndex).x][closed.at(closedIndex).y + voffs.at(i).y].sprite == "0"))
 					continue;
@@ -157,10 +157,10 @@ std::vector<sf::Vector2i> Board::FindPath(sf::Vector2i from, sf::Vector2i to)	//
 	if (found) {
 		debug.clear();
 		for (unsigned int i = 0; i < closed.size(); i++) {
-			debug.append(sf::Vertex(sf::Vector2f(closed.at(i).x*Constants::tileSize, closed.at(i).y*Constants::tileSize), sf::Color(50, 50, 255, 50)));
-			debug.append(sf::Vertex(sf::Vector2f(closed.at(i).x*Constants::tileSize+Constants::tileSize, closed.at(i).y*Constants::tileSize), sf::Color(50, 50, 255, 50)));
-			debug.append(sf::Vertex(sf::Vector2f(closed.at(i).x*Constants::tileSize+Constants::tileSize, closed.at(i).y*Constants::tileSize+Constants::tileSize), sf::Color(50, 50, 255, 50)));
-			debug.append(sf::Vertex(sf::Vector2f(closed.at(i).x*Constants::tileSize, closed.at(i).y*Constants::tileSize+Constants::tileSize), sf::Color(50, 50, 255, 50)));
+			debug.append(sf::Vertex(sf::Vector2f(closed.at(i).x*Constants::tileSize, closed.at(i).y*Constants::tileSize), sf::Color(25, 25, 255, 25)));
+			debug.append(sf::Vertex(sf::Vector2f(closed.at(i).x*Constants::tileSize+Constants::tileSize, closed.at(i).y*Constants::tileSize), sf::Color(25, 25, 255, 25)));
+			debug.append(sf::Vertex(sf::Vector2f(closed.at(i).x*Constants::tileSize+Constants::tileSize, closed.at(i).y*Constants::tileSize+Constants::tileSize), sf::Color(25, 25, 255, 25)));
+			debug.append(sf::Vertex(sf::Vector2f(closed.at(i).x*Constants::tileSize, closed.at(i).y*Constants::tileSize+Constants::tileSize), sf::Color(25, 25, 255, 25)));
 		}
 		found = false;
 		closedIndex = closed.size() - 1;

@@ -40,7 +40,7 @@ void Scene::CheckAICombat()
 	AIInCombat.clear();
 	for (aiUnit = 0; aiUnit < units.size(); aiUnit++) {
 		if (!units.at(aiUnit).Dead() && units.at(aiUnit).player == 0) {
-			if(AIFindTarget()>=0)
+			if(AIFindTarget()!=-1)
 				AIInCombat.push_back(aiUnit);
 		}
 	}
@@ -49,6 +49,7 @@ void Scene::CheckAICombat()
 
 void Scene::AITurn()
 {
+	std::vector<sf::Vector2i> voffs = Resources::Voffs(true);
 	int temp = aiUnit;
 	for (int i = aiUnit + 1; i < units.size(); i++) {
 		if (units.at(i).player == 0 && !units.at(i).Dead()) {
@@ -60,35 +61,51 @@ void Scene::AITurn()
 		aiUnit = -1;
 		EndTurn();
 	}
-	else {
-		int index = AIFindTarget();
-		if (index == -1) {
-			AIReady = true;
-			return;
+	else if(units.at(aiUnit).target>=0) {
+		int dist = 999;
+		int index = units.at(aiUnit).target;
+		std::vector<sf::Vector2i> path;
+		int shortest = -1;
+		if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) > 1) {
+			for (unsigned int i = 1; i < voffs.size(); i++) {
+				path = board.FindPath(units.at(aiUnit).tile, units.at(index).tile + voffs.at(i));
+				if (path.size() && path.size() < dist && path.size()<12) {
+					units.at(aiUnit).currentPath = path;
+					dist = path.size();
+				}
+			}
 		}
-		int dist = Unit::Distance(units.at(aiUnit).tile, units.at(index).tile);
 
-		if (index != -1 && dist < 8 && dist > 1) {
+		boardUiV.clear();
+		path = units.at(aiUnit).currentPath;
+		for (unsigned int i = 0; i < path.size(); i++) {
+			boardUiV.append(sf::Vertex(sf::Vector2f(path.at(i).x*Constants::tileSize + Constants::tileSize / 2, path.at(i).y*Constants::tileSize + Constants::tileSize / 2), sf::Color(255, 50, 50, 255)));
+		}
+
+		if (units.at(aiUnit).currentPath.size()) {
 			for (int i = 0; i < 5; i++) {
-				if (units.at(aiUnit).MoveTowards(units.at(index).tile))
+				if (units.at(aiUnit).MovePath())
 					sf::sleep(sf::milliseconds(300));
-				if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) < 2) {
+				if (Unit::Distance(units.at(aiUnit).tile,units.at(index).tile)==1) {
 					break;
 				}
 			}
 		}
 
-		if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) < 2) {
-			while (units.at(aiUnit).AttackTo(units.at(index).tile)) {
-				sf::sleep(sf::milliseconds(300));
-				if (units.at(index).Dead()) {
-					index = AIFindTarget();
-					if (index == -1) {
-						break;
-					}
+		while (units.at(aiUnit).AttackTo(units.at(index).tile)) {
+			sf::sleep(sf::milliseconds(300));
+			if (units.at(index).Dead()) {
+				index = AIFindTarget();
+				if (index == -1) {
+					break;
 				}
 			}
 		}
+	}
+	else if (units.at(aiUnit).currentPath.size()) {
+		while(units.at(aiUnit).MovePath())
+			sf::sleep(sf::milliseconds(300));
+		units.at(aiUnit).currentPath.clear();
 	}
 	AIReady = true;
 }
@@ -107,7 +124,10 @@ int Scene::AIFindTarget()
 		}
 	}
 	if (dist >= 8)
-		return -1;
+		index = -1;
+	units.at(aiUnit).target = index;
+	if (units.at(aiUnit).currentPath.size())
+		return -2;
 	return index;
 }
 
@@ -197,7 +217,7 @@ void Scene::AddTile(sf::Sprite * spr)
 void Scene::AddUnit(Unit * unit)
 {
 	units.push_back(*unit);
-	if (unit->player == 1) {
+	if (unit->player > 0) {
 		playerUnits.push_back(unit->id);
 	}
 	bool found = false;

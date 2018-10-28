@@ -18,6 +18,7 @@ public:
 	void LoadFromFile(std::string path);
 	bool MoveTo(sf::Vector2i pos, int ap = 3);
 	bool MoveTowards(sf::Vector2i pos);
+	bool MovePath();
 	bool LootFrom(sf::Vector2i pos);
 	bool LootFrom(Unit* unit);
 	bool AttackTo(sf::Vector2i pos);
@@ -50,15 +51,18 @@ public:
 	int id;
 	sf::Vector2i tile;
 	std::vector<sf::Vector2i> currentPath;
+	int target;
 	sf::Sprite sprite;
 	sf::VertexArray bars;
-	static std::vector<Unit>* unit;
 	bool removed = false;
+
+	static std::vector<Unit>* unit;
 private:
+	static int unitCount;
+
 	bool Unequip(int i, int slot = 0, bool quiet = false);
 	Unit* ChooseBodyFrom(sf::Vector2i pos);
 	int pushedBy = -1;
-	static int unitCount;
 	std::string name, nick;
 	Damage armor;
 	int maxAP, AP;

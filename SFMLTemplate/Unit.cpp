@@ -240,11 +240,12 @@ bool Unit::TransferWeapon(Unit * from, Unit * to, int index)
 bool Unit::MoveTo(sf::Vector2i pos, int ap)
 {
 	pos = sf::Vector2i(std::min(std::max(pos.x, 0), Constants::boardSize - 1), std::min(std::max(pos.y, 0), Constants::boardSize - 1));
-	if (Tile::tileRef[pos.x][pos.y].sprite != "0" && Tile::tileRef[pos.x][pos.y].unit==-1) {
+	if (Tile::tileRef[pos.x][pos.y].sprite != "0" && Tile::tileRef[pos.x][pos.y].unit==-1
+		&& (Tile::tileRef[pos.x][tile.y].sprite != "0" || Tile::tileRef[tile.x][pos.y].sprite != "0")) {
 		if (std::abs(tile.x - pos.x) < 2 && std::abs(tile.y - pos.y) < 2) {
 			if (Distance(pos, tile) == 2) {
-				if (AP >= ap*1.5f)
-					AP -= ap*1.5f;
+				if (AP >= ap*1.3f)
+					AP -= ap*1.3f;
 				else
 					return false;
 			}
@@ -286,6 +287,21 @@ bool Unit::MoveTowards(sf::Vector2i pos)
 	for (int i = 0; i < voffs.size(); i++) {
 		if (Push(tile + dif + voffs.at(i)))
 			return true;
+	}
+	return false;
+}
+
+bool Unit::MovePath()
+{
+	if (currentPath.size()) {
+		for (unsigned int i = 0; i < currentPath.size() - 1; i++) {
+			if (currentPath.at(i) == tile) {
+				if (!MoveTo(currentPath.at(i + 1))) {
+					return false;
+				}
+				return true;
+			}
+		}
 	}
 	return false;
 }
