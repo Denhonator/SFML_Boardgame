@@ -13,6 +13,10 @@ Main::Main()
 	window.setFramerateLimit(55);
 	mainScene.SetTileSize(window.getSize().y / mainScene.GetBoard()->boardSize.y);
 	Console::init();
+
+	click = 0;
+	mouseThread = std::thread(&Main::MouseEvents, this);
+	keyThread = std::thread(&Main::KeyEvents, this);
 }
 
 Main::~Main()
@@ -23,15 +27,41 @@ Main::~Main()
 		mouseThread.join();
 }
 
-float clamp(float val, float min, float max) {
-	return std::max(std::min(val, max), min);
+void Main::KeyEvents()
+{
+	while (window.isOpen()) {
+		while (keys.size()) {
+			mainScene.KeyPress(keys.back());
+			keys.pop_back();
+		}
+		sf::sleep(sf::milliseconds(15));
+	}
+}
+
+void Main::MouseEvents()
+{
+	while (window.isOpen()) {
+		if (click) {
+			mainScene.Click();
+			click = 0;
+		}
+		sf::sleep(sf::milliseconds(15));
+	}
 }
 
 void Main::Events()
 {
+	idleTimer -= Time::Mult();
+	if (idleTimer < 0) {
+		idleTimer = 60;
+		window.setFramerateLimit(5);
+	}
 	sf::Event event;
 	while (window.pollEvent(event))
 	{
+		idleTimer = 60;
+		window.setFramerateLimit(55);
+
 		if (event.type == sf::Event::Closed) {
 			window.close();
 		}
@@ -55,13 +85,7 @@ void Main::Events()
 				Console::GetPrevious();
 			}
 			else if(!Console::enable) {
-				if (keyThread.joinable() && !Messages::prompting)
-					keyThread.join();
-				if (keyThread.joinable()&&Messages::prompting) {
-					;
-				}
-				else
-					keyThread = std::thread(&Scene::KeyPress, &mainScene, event.key.code);
+				keys.push_back(event.key.code);
 			}
 		}
 
@@ -69,7 +93,7 @@ void Main::Events()
 			if (Console::enable) {
 				Console::Write(event.text.unicode);
 			}
-			if (keyThread.joinable() && Messages::prompting) {
+			if (Messages::prompting) {
 				Messages::SetInput(static_cast<char>(event.text.unicode));
 			}
 		}
@@ -94,13 +118,7 @@ void Main::Events()
 
 		if (event.type == sf::Event::MouseButtonPressed) {
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-				if (mouseThread.joinable() && !Messages::prompting)
-					mouseThread.join();
-				if (mouseThread.joinable() && Messages::prompting) {
-					Messages::Click(window.mapPixelToCoords(mousePos, fixedView));
-				}
-				else
-					mouseThread = std::thread(&Scene::Click, &mainScene);
+				click = 1;
 			}
 		}
 	}

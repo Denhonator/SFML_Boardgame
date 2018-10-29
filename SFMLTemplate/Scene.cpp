@@ -6,7 +6,7 @@ Scene::Scene()
 	board.Randomize();
 	for (int i = 0; i < board.boardSize.x; i++) {
 		for (int j = 0; j < board.boardSize.y; j++) {
-			if (i + j > 6 && board.GetTile(i, j).sprite == "grass"&&board.GetTile(i, j).unit == -1 && rand() % 101 > 95)
+			if (i + j > 7 && board.GetTile(i, j).sprite == "grass"&&board.GetTile(i, j).unit == -1 && rand() % 101 > 95)
 				AddUnit(&Unit("cave crab", 0, sf::Vector2i(i, j)));
 		}
 	}
@@ -22,15 +22,19 @@ Scene::Scene()
 	AddUnit(&Unit("swordguy", 1, mouseTile,"denho"));
 	currentPlayer = 1;
 	currentUnit = -1;
+	aiUnit = -1;
 	currentAction = "";
 	players = { 1 };
 	menu = Menu(-1, -1);
 	boardUiV.setPrimitiveType(sf::PrimitiveType::LineStrip);
 	UpdateState();
+
+	AI = std::thread(&Scene::AITurn, this);
 }
 
 Scene::~Scene()
 {
+	running = false;
 	if (AI.joinable())
 		AI.join();
 }
@@ -38,95 +42,95 @@ Scene::~Scene()
 void Scene::CheckAICombat()
 {
 	AIInCombat.clear();
-	for (aiUnit = 0; aiUnit < units.size(); aiUnit++) {
-		if (!units.at(aiUnit).Dead() && units.at(aiUnit).player == 0) {
-			if(AIFindTarget()!=-1)
-				AIInCombat.push_back(aiUnit);
+	for (int i = 0; i < units.size(); i++) {
+		if (!units.at(i).Dead() && units.at(i).player == 0) {
+			if(AIFindTarget(i)!=-1)
+				AIInCombat.push_back(i);
 		}
 	}
-	aiUnit = -1;
 }
 
 void Scene::AITurn()
 {
-	std::vector<sf::Vector2i> voffs = Resources::Voffs(true);
-	int temp = aiUnit;
-	for (int i = aiUnit + 1; i < units.size(); i++) {
-		if (units.at(i).player == 0 && !units.at(i).Dead()) {
-			aiUnit = i;
-			break;
-		}
-	}
-	if (temp == aiUnit) {
-		aiUnit = -1;
-		EndTurn();
-	}
-	else if(units.at(aiUnit).target>=0) {
-		int dist = 999;
-		int index = units.at(aiUnit).target;
-		std::vector<sf::Vector2i> path;
-		int shortest = -1;
-		if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) > 1) {
-			for (unsigned int i = 1; i < voffs.size(); i++) {
-				path = board.FindPath(units.at(aiUnit).tile, units.at(index).tile + voffs.at(i));
-				if (path.size() && path.size() < dist && path.size()<12) {
-					units.at(aiUnit).currentPath = path;
-					dist = path.size();
+	std::vector<sf::Vector2i> voffs;
+	while (running) {
+		voffs = Resources::Voffs(true);
+		while (aiUnit > -1 && aiUnit < units.size()) {
+			if (units.at(aiUnit).player == 0 && !units.at(aiUnit).Dead()) {
+				if (units.at(aiUnit).target >= 0) {
+					int dist = 999;
+					int index = units.at(aiUnit).target;
+					std::vector<sf::Vector2i> path;
+					int shortest = -1;
+					if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) > 1) {
+						for (unsigned int i = 1; i < voffs.size(); i++) {
+							path = board.FindPath(units.at(aiUnit).tile, units.at(index).tile + voffs.at(i));
+							if (path.size() && path.size() < dist && path.size() < 12) {
+								units.at(aiUnit).currentPath = path;
+								dist = path.size();
+							}
+						}
+					}
+
+					boardUiV.clear();	//pathing debug
+					path = units.at(aiUnit).currentPath;
+					for (unsigned int i = 0; i < path.size(); i++) {
+						boardUiV.append(sf::Vertex(sf::Vector2f(path.at(i).x*Constants::tileSize + Constants::tileSize / 2, path.at(i).y*Constants::tileSize + Constants::tileSize / 2), sf::Color(255, 50, 50, 255)));
+					}
+
+					if (units.at(aiUnit).currentPath.size()) {
+						for (int i = 0; i < 5; i++) {
+							if (units.at(aiUnit).MovePath())
+								sf::sleep(sf::milliseconds(300));
+							if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) == 1) {
+								break;
+							}
+						}
+					}
+
+					while (units.at(aiUnit).AttackTo(units.at(index).tile)) {
+						sf::sleep(sf::milliseconds(300));
+						if (units.at(index).Dead()) {
+							index = AIFindTarget(aiUnit);
+							if (index == -1) {
+								break;
+							}
+						}
+					}
+				}
+				else if (units.at(aiUnit).currentPath.size()) {
+					while (units.at(aiUnit).MovePath())
+						sf::sleep(sf::milliseconds(300));
+					units.at(aiUnit).currentPath.clear();
 				}
 			}
-		}
-
-		boardUiV.clear();
-		path = units.at(aiUnit).currentPath;
-		for (unsigned int i = 0; i < path.size(); i++) {
-			boardUiV.append(sf::Vertex(sf::Vector2f(path.at(i).x*Constants::tileSize + Constants::tileSize / 2, path.at(i).y*Constants::tileSize + Constants::tileSize / 2), sf::Color(255, 50, 50, 255)));
-		}
-
-		if (units.at(aiUnit).currentPath.size()) {
-			for (int i = 0; i < 5; i++) {
-				if (units.at(aiUnit).MovePath())
-					sf::sleep(sf::milliseconds(300));
-				if (Unit::Distance(units.at(aiUnit).tile,units.at(index).tile)==1) {
-					break;
-				}
+			aiUnit++;
+			if (aiUnit == units.size()) {
+				aiUnit = -2;
+				break;
 			}
 		}
-
-		while (units.at(aiUnit).AttackTo(units.at(index).tile)) {
-			sf::sleep(sf::milliseconds(300));
-			if (units.at(index).Dead()) {
-				index = AIFindTarget();
-				if (index == -1) {
-					break;
-				}
-			}
-		}
+		sf::sleep(sf::milliseconds(10));
 	}
-	else if (units.at(aiUnit).currentPath.size()) {
-		while(units.at(aiUnit).MovePath())
-			sf::sleep(sf::milliseconds(300));
-		units.at(aiUnit).currentPath.clear();
-	}
-	AIReady = true;
 }
 
-int Scene::AIFindTarget()
+int Scene::AIFindTarget(int unitIndex)
 {
 	int dist = 100;
 	int index = -1;
 	for (int i = 0; i < units.size(); i++) {
 		if (units.at(i).player == 0)
 			continue;
-		int newDist = Unit::Distance(units.at(aiUnit).tile, units.at(i).tile);
-		if (newDist < dist && !units.at(i).Dead() && board.CheckLOS(units.at(aiUnit).tile.x,units.at(aiUnit).tile.y,units.at(i).tile.x,units.at(i).tile.y)) {
+		int newDist = Unit::Distance(units.at(unitIndex).tile, units.at(i).tile);
+		if (newDist < dist && !units.at(i).Dead() && board.CheckLOS(units.at(unitIndex).tile.x,units.at(unitIndex).tile.y,units.at(i).tile.x,units.at(i).tile.y)) {
 			dist = newDist;
 			index = i;
 		}
 	}
 	if (dist >= 8)
 		index = -1;
-	units.at(aiUnit).target = index;
-	if (units.at(aiUnit).currentPath.size())
+	units.at(unitIndex).target = index;
+	if (units.at(unitIndex).currentPath.size())
 		return -2;
 	return index;
 }
@@ -157,14 +161,17 @@ void Scene::SetCombat(bool val)
 void Scene::Update()
 {
 	if (currentPlayer == 0 && players.size()>1) {
-		if (aiUnit == -1) {
+		if (aiUnit == -2) {
+			aiUnit = -1;
+			EndTurn();
+		}
+		else if (aiUnit == -1) {
 			int prev = AIInCombat.size();
 			CheckAICombat();
 			if (AIInCombat.size()) {
 				SetCombat(true);
 				if (prev) {
-					AIReady = false;
-					AI = std::thread(&Scene::AITurn, this);
+					aiUnit = 0;
 				}
 				else
 					currentPlayer = NextFromList(currentPlayer, players);
@@ -174,16 +181,8 @@ void Scene::Update()
 				currentPlayer = NextFromList(currentPlayer, players);
 			}
 		}
-		if (AIReady&&currentPlayer==0) {
-			AI.join();
-			AIReady = false;
-			AI = std::thread(&Scene::AITurn, this);
-		}
 	}
-	else if (AIReady) {
-		AI.join();
-		AIReady = false;
-	}
+
 	if (board.refresh) {
 		for (unsigned int x = 0; x < board.boardSize.x; x++) {
 			for (unsigned int y = 0; y < board.boardSize.y; y++) {

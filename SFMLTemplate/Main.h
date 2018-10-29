@@ -11,14 +11,18 @@ class Main
 public:
 	Main();
 	~Main();
-	 void Events();
-	 void Update();
-	 void FixedUpdate();
-	 void Draw();
-	 sf::RenderWindow* GetWindow();
+	void MouseEvents();
+	void KeyEvents();
+	void Events();
+	void Update();
+	void FixedUpdate();
+	void Draw();
+	sf::RenderWindow* GetWindow();
 private:
 	std::thread keyThread;
 	std::thread mouseThread;
+	std::vector<sf::Keyboard::Key> keys;
+	short click;
 	sf::RenderWindow window;
 	std::vector<sf::Sprite>* tiles;
 	std::vector<sf::Sprite>* sprites;
@@ -27,5 +31,6 @@ private:
 	sf::View view;
 	sf::View fixedView;
 	sf::Vector2i mousePos;
+	float idleTimer = 60;
 };
 

@@ -33,17 +33,17 @@ public:
 	std::vector<unsigned int> playerUnits;
 	Menu menu;
 private:
+	bool running = true;
 	std::thread AI;
 	std::vector<int> AIInCombat;
 	void CheckAICombat();
 	void AITurn();
-	int AIFindTarget();
+	int AIFindTarget(int unitIndex);
 	int NextFromList(int to, std::vector<int> list);
 	void SetCombat(bool val);
-	bool AIReady = false;
 	bool combat = false;
 	bool update;
-	int aiUnit = -1;
+	int aiUnit;
 	Board board;
 	sf::Vector2i mouseTile;
 	sf::Vector2f mousePos;
