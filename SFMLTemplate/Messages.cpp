@@ -30,7 +30,7 @@ void Messages::Add(std::string s)
 		texts.shrink_to_fit();
 	}
 	std::string buffer = "";
-	for (int i = 0; i < texts.size(); i++) {
+	for (unsigned int i = 0; i < texts.size(); i++) {
 		buffer += texts.at(i);
 		if (i < texts.size() - 1)
 			buffer += "\n";

@@ -6,8 +6,17 @@ Scene::Scene()
 	board.Randomize();
 	for (int i = 0; i < board.boardSize.x; i++) {
 		for (int j = 0; j < board.boardSize.y; j++) {
-			if (i + j > 7 && board.GetTile(i, j).sprite == "grass"&&board.GetTile(i, j).unit == -1 && rand() % 101 > 95)
-				AddUnit(&Unit("cave crab", 0, sf::Vector2i(i, j)));
+			if (i + j > 7 && board.GetTile(i, j).sprite == "grass"&&board.GetTile(i, j).unit == -1 && rand() % 101 > 95) {
+				int r = rand() % 101;
+				if(r<30)
+					AddUnit(&Unit("cave crab", 0, sf::Vector2i(i, j)));
+				else if(r<60)
+					AddUnit(&Unit("slime", 0, sf::Vector2i(i, j)));
+				else if(r<90)
+					AddUnit(&Unit("snake bat", 0, sf::Vector2i(i, j)));
+				else
+					AddUnit(&Unit("snake bat", 0, sf::Vector2i(i, j)));
+			}
 		}
 	}
 	const sf::Texture& bg = board.GetTexture(true)->getTexture();
@@ -53,21 +62,25 @@ void Scene::CheckAICombat()
 void Scene::AITurn()
 {
 	std::vector<sf::Vector2i> voffs;
+	int range = 1;
 	while (running) {
-		voffs = Resources::Voffs(true);
 		while (aiUnit > -1 && aiUnit < units.size()) {
+			range = units.at(aiUnit).GetWeapon()->GetAttack().range;
+			voffs = Resources::Voffs(true, range);
 			if (units.at(aiUnit).player == 0 && !units.at(aiUnit).Dead()) {
 				if (units.at(aiUnit).target >= 0) {
 					int dist = 999;
 					int index = units.at(aiUnit).target;
 					std::vector<sf::Vector2i> path;
 					int shortest = -1;
-					if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) > 1) {
-						for (unsigned int i = 1; i < voffs.size(); i++) {
-							path = board.FindPath(units.at(aiUnit).tile, units.at(index).tile + voffs.at(i));
-							if (path.size() && path.size() < dist && path.size() < 12) {
-								units.at(aiUnit).currentPath = path;
-								dist = path.size();
+					if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) > range) {
+						for (unsigned int i = 1; i < voffs.size(); i++) {	//Find fastest path to a tile in range of current attack
+							if (board.CheckLOS((units.at(index).tile + voffs.at(i)).x, (units.at(index).tile + voffs.at(i)).y, units.at(index).tile.x, units.at(index).tile.y)) {	//Only choose a tile with line of sight to target
+								path = board.FindPath(units.at(aiUnit).tile, units.at(index).tile + voffs.at(i));
+								if (path.size() && path.size() < dist && path.size() < 12) {
+									units.at(aiUnit).currentPath = path;
+									dist = path.size();
+								}
 							}
 						}
 					}
@@ -82,7 +95,7 @@ void Scene::AITurn()
 						for (int i = 0; i < 5; i++) {
 							if (units.at(aiUnit).MovePath())
 								sf::sleep(sf::milliseconds(300));
-							if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) == 1) {
+							if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) == range) {
 								break;
 							}
 						}

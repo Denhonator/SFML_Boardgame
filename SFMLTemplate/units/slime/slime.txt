@@ -1,0 +1,9 @@
+strength=1,10
+dexterity=1,10
+perception=1,10
+charisma=1,10
+willpower=1,15
+intelligence=1,15
+vitality=1,10
+luck=1,10
+weapon=slime,1

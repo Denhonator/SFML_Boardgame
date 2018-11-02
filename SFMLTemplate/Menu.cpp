@@ -40,20 +40,20 @@ bool Menu::Construct(int player)
 	this->player = player;
 	state = 0;
 	bgs.push_back(sf::Sprite(*Resources::GetTexture("ui/menuBG")));
-	for (int i = 0; i < Constants::attributes.size(); i++) {
+	for (unsigned int i = 0; i < Constants::attributes.size(); i++) {
 		attributeTexts.push_back(sf::Text(Constants::attributes.at(i) + ": " + std::to_string(u->GetAttribute(Constants::attributes.at(i))), *Resources::GetFont("default.ttf")));
 		attributes.push_back(MenuElement(Constants::attributes.at(i), "ui/button", 1));
 		attributes.at(i).text.setString(std::to_string(u->GetAtrRequirment(Constants::attributes.at(i)))+"XP");
 	}
-	for (int i = 0; i < u->GetWeapons()->size(); i++) {
+	for (unsigned int i = 0; i < u->GetWeapons()->size(); i++) {
 		items.push_back(MenuElement("weapon", u->GetWeapon(i)->inUse ? "ui/item" : "ui/button", i));
 		items.at(i).text.setString(u->GetWeapons()->at(i).Print(false,true));
 	}
-	for (int i = 0; i < u->GetEquipment()->size(); i++) {
+	for (unsigned int i = 0; i < u->GetEquipment()->size(); i++) {
 		items.push_back(MenuElement("equipment", u->GetEquipment()->at(i).inUse ? "ui/item" : "ui/button", i));
 		items.at(items.size() - 1).text.setString(u->GetEquipment()->at(i).Print(false, true));
 	}
-	for (int i = 0; i < u->GetItems()->size(); i++) {
+	for (unsigned int i = 0; i < u->GetItems()->size(); i++) {
 		items.push_back(MenuElement("item", "ui/button", i));
 		items.at(items.size() - 1).text.setString(u->GetItems()->at(i).Print());
 	}
@@ -125,21 +125,21 @@ void Menu::Refresh()
 	if (u == nullptr)
 		return;
 	unsigned int c = 0;
-	for (int i = 0; i < Constants::attributes.size(); i++) {
+	for (unsigned int i = 0; i < Constants::attributes.size(); i++) {
 		attributes.at(i).text.setString(std::to_string(u->GetAtrRequirment(Constants::attributes.at(i))) + "XP");
 		attributeTexts.at(i).setString(Constants::attributes.at(i) + ": " + std::to_string(u->GetAttribute(Constants::attributes.at(i))));
 	}
-	for (int i = 0; i < u->GetWeapons()->size(); i++) {
+	for (unsigned int i = 0; i < u->GetWeapons()->size(); i++) {
 		items.at(i).text.setString(u->GetWeapons()->at(i).Print(false, true));
 		items.at(i).sprite.setTexture(u->GetWeapon(i)->inUse ? *Resources::GetTexture("ui/item") : *Resources::GetTexture("ui/button"));
 		c++;
 	}
-	for (int i = 0; i < u->GetEquipment()->size(); i++) {
+	for (unsigned int i = 0; i < u->GetEquipment()->size(); i++) {
 		items.at(c).text.setString(u->GetEquipment()->at(i).Print(false, true));
 		items.at(c).sprite.setTexture(u->GetEquipment()->at(i).inUse ? *Resources::GetTexture("ui/item") : *Resources::GetTexture("ui/button"));
 		c++;
 	}
-	for (int i = 0; i < u->GetItems()->size(); i++) {
+	for (unsigned int i = 0; i < u->GetItems()->size(); i++) {
 		items.at(c).text.setString(u->GetItems()->at(i).Print());
 		c++;
 	}

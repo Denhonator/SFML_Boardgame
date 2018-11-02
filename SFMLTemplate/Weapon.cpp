@@ -17,8 +17,12 @@ Weapon::Weapon(std::string name, int level, int owner)
 				requirment[temp.first] = std::stoi(temp.second.at(0)) + std::stoi(temp.second.at(1))*(level - 1);
 			}
 			else {
+				int hitchance = std::stoi(temp.second.at(0));
 				int damage = (baseDamage * std::stoi(temp.second.at(1))) / 100;
-				attacks.push_back(Attack(owner, temp.first, std::stoi(temp.second.at(0)), Damage{ damage,0,0,0 }, 1, 5, 0));
+				int range = std::stoi(temp.second.at(2));
+				int ap = std::stoi(temp.second.at(3));
+				int mp = std::stoi(temp.second.at(4));
+				attacks.push_back(Attack(owner, temp.first, hitchance, Damage{ damage,0,0,0 }, range, ap>=0?ap:5, mp)); //Default AP cost 5
 			}
 		}
 	}

@@ -551,7 +551,7 @@ void Unit::UpdateBars()
 {
 	float width = Constants::tileSize / 40;
 	float heigth = Constants::tileSize*std::pow(maxHP/30.0f,1.0f);
-	sf::Vector2f offset = sf::Vector2f(4, Constants::tileSize / 2 - heigth / 2);
+	sf::Vector2f offset = sf::Vector2f(0, Constants::tileSize / 2 - heigth / 2);
 	float line = heigth * (1.0f-((float)HP / (float)maxHP));
 	bars[0].position = sprite.getPosition() + offset;
 	bars[1].position = sprite.getPosition() + offset + sf::Vector2f(width, 0);
@@ -562,7 +562,7 @@ void Unit::UpdateBars()
 	bars[6].position = sprite.getPosition() + offset + sf::Vector2f(0, heigth);
 	bars[7].position = sprite.getPosition() + offset + sf::Vector2f(width, heigth);
 	heigth = Constants::tileSize*std::pow(maxAP / 25.0f, 1.0f);
-	offset = sf::Vector2f(5+width, Constants::tileSize / 2 - heigth / 2);
+	offset = sf::Vector2f(width, Constants::tileSize / 2 - heigth / 2);
 	line = heigth * (1.0f - ((float)AP / (float)maxAP));
 	bars[8].position = bars[7].position;
 	bars[9].position = sprite.getPosition() + offset;

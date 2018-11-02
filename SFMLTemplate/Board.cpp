@@ -100,7 +100,7 @@ bool Board::CheckLOS(int x1, int y1, int x2, int y2, bool visual)
 
 std::vector<sf::Vector2i> Board::FindPath(sf::Vector2i from, sf::Vector2i to)	//A* algorithm
 {
-	if (to.x<0 || to.y<0 || to.x>Constants::boardSize || to.y>Constants::boardSize || tiles[to.x][to.y].sprite == "0" || tiles[to.x][to.y].unit>=0)
+	if (to.x<0 || to.y<0 || to.x>Constants::boardSize || to.y>Constants::boardSize || tiles[to.x][to.y].sprite == "0" || tiles[to.x][to.y].unit>=0)	//Instantly return empty vector if input is invalid
 		return std::vector<sf::Vector2i>();
 	std::vector<sf::Vector2i> finalPath;
 	std::vector<sf::Vector2i> open;

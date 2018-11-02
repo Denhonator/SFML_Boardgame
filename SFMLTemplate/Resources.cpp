@@ -5,10 +5,6 @@ std::map<std::string, sf::Font> Resources::font = {};
 std::map<std::string, sf::SoundBuffer> Resources::sound;
 std::vector<sf::Sound> Resources::player;
 int Resources::roll = 0;
-int Resources::voffsIndex = 0;
-int Resources::nondVoffsIndex = 0;
-std::vector <sf::Vector2i> Resources::voffs = {sf::Vector2i(0,0),sf::Vector2i(-1,0) ,sf::Vector2i(0,-1) ,sf::Vector2i(1,0) ,sf::Vector2i(0,1) ,sf::Vector2i(1,1) ,sf::Vector2i(-1,-1) ,sf::Vector2i(1,-1) ,sf::Vector2i(-1,1) };
-std::vector <sf::Vector2i> Resources::nondVoffs = { sf::Vector2i(0,0),sf::Vector2i(-1,0) ,sf::Vector2i(0,-1) ,sf::Vector2i(1,0) ,sf::Vector2i(0,1) };
 
 void Resources::RollerFunction() {
 	srand(time(NULL));
@@ -22,8 +18,6 @@ Resources::Resources()
 {
 	running = true;
 	roller = std::thread(&Resources::RollerFunction, this);
-	voffsIndex = 0;
-	nondVoffsIndex = 0;
 }
 
 Resources::~Resources()
@@ -75,7 +69,7 @@ std::vector<std::string> Resources::GetText(std::string path)
 void Resources::PlayWav(std::string s)
 {
 	int index = -1;
-	for (int i = 0; i < player.size(); i++) {
+	for (unsigned int i = 0; i < player.size(); i++) {
 		if (player.at(i).getStatus() != sf::Sound::Status::Playing) {
 			index = i;
 			break;
@@ -100,7 +94,7 @@ std::pair<std::string, std::vector<int>> Resources::KeyWithInts(std::string line
 	std::pair<std::string, std::vector<int>> temp;
 	temp.first = "";
 
-	for (int k = 0; k < line.size(); k++) {
+	for (unsigned int k = 0; k < line.size(); k++) {
 		if (line[k] == '=') {
 			temp.first = buffer;
 			buffer = "";
@@ -123,7 +117,7 @@ std::pair<std::string, std::vector<std::string>> Resources::KeyWithStrings(std::
 	std::pair<std::string, std::vector<std::string>> temp;
 	temp.first = "";
 
-	for (int k = 0; k < line.size(); k++) {
+	for (unsigned int k = 0; k < line.size(); k++) {
 		if (line[k] == '=' && temp.first=="") {
 			temp.first = buffer;
 			buffer = "";
@@ -150,24 +144,25 @@ int Resources::Roll()
 	return roll;
 }
 
-std::vector<sf::Vector2i> Resources::Voffs(bool nond)
+std::vector<sf::Vector2i> Resources::Voffs(bool nond, int range)
 {
-	std::vector<sf::Vector2i> t = voffs;
-	unsigned int x = 0;
-	if (nond) {			//Changes starting point each time
-		t = nondVoffs;
-		nondVoffsIndex++;
-		if (nondVoffsIndex >= nondVoffs.size())
-			nondVoffsIndex = 0;
-		x = nondVoffsIndex;
+	std::vector<sf::Vector2i> t;
+	for (int i = 0; i <= range; i++) {
+		for (int j = 0; j <= range; j++) {
+			if (i + j <= range || (!nond && i <= range && j <= range)) {
+				t.push_back(sf::Vector2i(i, j));
+				if (i > 0)
+					t.push_back(sf::Vector2i(-i, j));
+				if (j > 0)
+					t.push_back(sf::Vector2i(i, -j));
+				if (i > 0 && j > 0)
+					t.push_back(sf::Vector2i(-i, -j));
+			}
+		}
 	}
-	else {
-		voffsIndex++;
-		if (voffsIndex >= voffs.size())
-			voffsIndex = 0;
-		x = voffsIndex;
-	}
-	std::vector<sf::Vector2i> r;
+	unsigned int x = rand()%t.size();	//Random starting pos for vector
+
+	std::vector<sf::Vector2i> r;	//Put vector in new order for variance
 	r.push_back(t.at(0));
 	t.erase(t.begin());
 	
