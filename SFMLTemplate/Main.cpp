@@ -53,13 +53,13 @@ void Main::Events()
 {
 	idleTimer -= Time::Mult();
 	if (idleTimer < 0) {
-		idleTimer = 60;
+		idleTimer = 300;
 		window.setFramerateLimit(5);
 	}
 	sf::Event event;
 	while (window.pollEvent(event))
 	{
-		idleTimer = 60;
+		idleTimer = 300;
 		window.setFramerateLimit(55);
 
 		if (event.type == sf::Event::Closed) {
@@ -147,7 +147,8 @@ void Main::Draw()
 		}
 	}
 	for (unsigned int i = 0; i < mainScene.boardUi.size(); i++) {
-		window.draw(mainScene.boardUi.at(i));
+		if(i!=1||mainScene.boardUi.at(i).getPosition()!=sf::Vector2f(0,0))
+			window.draw(mainScene.boardUi.at(i));
 	}
 	window.draw(mainScene.boardUiV);
 	window.draw(mainScene.GetBoard()->debug);

@@ -369,7 +369,7 @@ bool Unit::LootFrom(Unit * unit)
 	}
 }
 
-bool Unit::AttackTo(sf::Vector2i pos)
+bool Unit::AttackTo(sf::Vector2i pos, bool dry, sf::Sprite* aSprite)
 {
 	if (weapons.at(currentWeapon).CanUse(attribute)) {
 		Attack a = weapons.at(currentWeapon).GetAttack();
@@ -378,6 +378,8 @@ bool Unit::AttackTo(sf::Vector2i pos)
 		if (AP >= a.ap && Distance(tile, pos) <= a.range) {
 			Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
 			if (target != nullptr) {
+				if (dry)
+					return true;
 
 				if(target->player == player && player!=0){
 					a.roll += charBonus;
@@ -395,6 +397,18 @@ bool Unit::AttackTo(sf::Vector2i pos)
 
 				a.roll += tohit;
 				AP -= a.ap;
+				if (aSprite != nullptr) {
+					sf::Texture * t = Resources::GetTexture("attacks/" + GetWeapon()->GetAttack().name);
+					aSprite->setTexture(t != nullptr ? *t : *Resources::GetTexture("attacks/default"));	//Set texture to attack specific or default if missing
+					sf::Vector2f offset = sf::Vector2f(aSprite->getGlobalBounds().width / 2, aSprite->getGlobalBounds().height / 2);
+					aSprite->setPosition(sprite.getPosition()+offset);
+					sf::Vector2f attackDir = target->sprite.getPosition()+offset - aSprite->getPosition();
+					for (unsigned int i = 0; i < 30; i++) {
+						aSprite->move(attackDir.x / 30, attackDir.y / 30);
+						sf::sleep(sf::milliseconds(16));
+					}
+					aSprite->setPosition(0, 0);
+				}
 				Messages::Add(name + " rolls " + std::to_string(a.roll) + "/" + std::to_string(a.successThreshold) + " on " + a.name + " against " + target->nick);
 				if(a.roll>=a.successThreshold&&!a.fail)
 					target->GetAttacked(a);

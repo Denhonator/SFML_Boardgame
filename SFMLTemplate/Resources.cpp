@@ -35,7 +35,7 @@ sf::Texture * Resources::GetTexture(std::string name)
 		tile[name] = buffer;
 		return &tile[name];
 	}
-	return &tile.at("0");
+	return nullptr;
 }
 
 sf::Font * Resources::GetFont(std::string name)

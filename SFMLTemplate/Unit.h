@@ -21,7 +21,7 @@ public:
 	bool MovePath();
 	bool LootFrom(sf::Vector2i pos);
 	bool LootFrom(Unit* unit);
-	bool AttackTo(sf::Vector2i pos);
+	bool AttackTo(sf::Vector2i pos, bool dry = false, sf::Sprite* aSprite = nullptr);
 	bool Push(sf::Vector2i pos);
 	bool UseItem(sf::Vector2i pos, int i = -1);
 	void GetAffected(Effect e);

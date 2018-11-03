@@ -150,9 +150,11 @@ std::vector<sf::Vector2i> Board::FindPath(sf::Vector2i from, sf::Vector2i to)	//
 				openIndex = i;
 			}
 		}
-		closed.push_back(open.at(openIndex));
-		open.erase(open.begin() + openIndex);
-		closedIndex++;
+		if (open.size()) {
+			closed.push_back(open.at(openIndex));
+			open.erase(open.begin() + openIndex);
+			closedIndex++;
+		}
 	} while (open.size()&&!found);
 	if (found) {
 		debug.clear();

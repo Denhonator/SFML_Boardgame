@@ -23,6 +23,8 @@ Scene::Scene()
 	AddTile(&sf::Sprite(bg));
 	boardUi.push_back(sf::Sprite(*Resources::GetTexture("ui/outline")));
 	boardUi.at(0).setScale(Constants::tileSize / boardUi.at(0).getLocalBounds().width, Constants::tileSize / boardUi.at(0).getLocalBounds().height);
+	boardUi.push_back(*new sf::Sprite(*Resources::GetTexture("attacks/default")));
+	boardUi.at(1).setScale(Constants::tileSize / boardUi.at(0).getLocalBounds().width, Constants::tileSize / boardUi.at(0).getLocalBounds().height);
 	for (int i = 0; i < 10; i++) {
 		texts.push_back(sf::Text("", *Resources::GetFont("default.ttf")));
 		texts.at(i).setPosition(sf::Vector2f(i>4 ? 2100 : 0, i%5 * 200));
@@ -101,11 +103,11 @@ void Scene::AITurn()
 						}
 					}
 
-					while (units.at(aiUnit).AttackTo(units.at(index).tile)) {
+					while (units.at(aiUnit).AttackTo(units.at(index).tile,false,&boardUi.at(1))) {
 						sf::sleep(sf::milliseconds(300));
 						if (units.at(index).Dead()) {
 							index = AIFindTarget(aiUnit);
-							if (index == -1) {
+							if (index < 0) {
 								break;
 							}
 						}
@@ -429,7 +431,7 @@ void Scene::Click()
 			}
 		}
 		else if (currentAction == "attack") {
-			if (u->AttackTo(mouseTile) && !combat)
+			if (u->AttackTo(mouseTile,false,&boardUi.at(1)) && !combat)
 				EndTurn();
 		}
 		else if (currentAction == "loot") {
