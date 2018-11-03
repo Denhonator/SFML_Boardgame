@@ -131,6 +131,7 @@ void Main::Update()
 
 void Main::FixedUpdate()
 {
+	mainScene.FixedUpdate();
 	Messages::FadeNotice();
 }
 
@@ -147,9 +148,10 @@ void Main::Draw()
 		}
 	}
 	for (unsigned int i = 0; i < mainScene.boardUi.size(); i++) {
-		if(i!=1||mainScene.boardUi.at(i).getPosition()!=sf::Vector2f(0,0))
-			window.draw(mainScene.boardUi.at(i));
+		window.draw(mainScene.boardUi.at(i));
 	}
+	if(Unit::projectile.getPosition() != sf::Vector2f(0, 0))
+		window.draw(Unit::projectile);
 	window.draw(mainScene.boardUiV);
 	window.draw(mainScene.GetBoard()->debug);
 

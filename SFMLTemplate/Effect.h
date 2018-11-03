@@ -8,6 +8,7 @@ public:
 	~Effect();
 	int hp, mp, ap;
 	int owner;
+	int duration;
 	std::string name, itemName;
 private:
 	int level;

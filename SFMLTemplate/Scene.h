@@ -10,6 +10,7 @@ public:
 	Scene();
 	~Scene();
 	void Update();
+	void FixedUpdate();
 	void AddTile(sf::Sprite* spr);
 	void AddUnit(Unit* unit);
 	void RemoveUnit(unsigned int i);

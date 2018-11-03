@@ -2,6 +2,7 @@
 
 int Unit::unitCount = 0;
 std::vector<Unit>* Unit::unit;
+sf::Sprite Unit::projectile;
 
 Unit::Unit(std::string name, int player, sf::Vector2i pos, std::string nick)
 {
@@ -211,7 +212,7 @@ void Unit::UpdateBonuses()
 	charBonus = -10 + attribute["charisma"] * 4;
 
 	armor = { 0,0,0,0 };
-	for (int i = 0; i < equipment.size(); i++) {
+	for (int i = 0; i < equipment.size(); i++) {	//Equipment effects
 		if (equipment.at(i).inUse) {
 			armor.physical += equipment.at(i).armor.physical;
 			armor.fire += equipment.at(i).armor.fire;
@@ -369,13 +370,31 @@ bool Unit::LootFrom(Unit * unit)
 	}
 }
 
-bool Unit::AttackTo(sf::Vector2i pos, bool dry, sf::Sprite* aSprite)
+void Unit::ProjectileAnimation(sf::Vector2i from, sf::Vector2i to, std::string attackName, int effect)
+{
+	Unit * f = GetUnit(Tile::tileRef[from.x][from.y].unit);
+	sf::Texture * tex = Resources::GetTexture("attacks/" + attackName);
+	projectile.setTexture(tex != nullptr ? *tex : *Resources::GetTexture("attacks/default"));	//Set texture to attack-specific or default if missing
+	sf::Vector2f offset = sf::Vector2f(projectile.getGlobalBounds().width / 2, projectile.getGlobalBounds().height / 2);
+	if(projectile.getPosition()==sf::Vector2f(0,0))
+		projectile.setPosition(f->sprite.getPosition() + offset);
+	sf::Vector2f attackDir = sf::Vector2f(to.x*Constants::tileSize,to.y*Constants::tileSize) + offset - projectile.getPosition();
+	if (effect == -1) {	//miss effect
+		attackDir += sf::Vector2f((Resources::Roll() % 3 - 1) * 2 * offset.x, (Resources::Roll() % 5 - 2) * offset.y);
+	}
+	for (unsigned int i = 0; i < 30; i++) {
+		projectile.move(attackDir.x / 30, attackDir.y / 30);
+		sf::sleep(sf::milliseconds(16));
+	}
+}
+
+bool Unit::AttackTo(sf::Vector2i pos, Board* board, bool dry)
 {
 	if (weapons.at(currentWeapon).CanUse(attribute)) {
 		Attack a = weapons.at(currentWeapon).GetAttack();
 		a.fail = a.roll <= 5 + criticalFail;
 		a.crit = a.roll >= 95 + criticalHit;
-		if (AP >= a.ap && Distance(tile, pos) <= a.range) {
+		if (AP >= a.ap && Distance(tile, pos) <= a.range && board->CheckLOS(tile.x,tile.y,pos.x,pos.y,false,0.4f)) {
 			Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
 			if (target != nullptr) {
 				if (dry)
@@ -397,26 +416,29 @@ bool Unit::AttackTo(sf::Vector2i pos, bool dry, sf::Sprite* aSprite)
 
 				a.roll += tohit;
 				AP -= a.ap;
-				if (aSprite != nullptr) {
-					sf::Texture * t = Resources::GetTexture("attacks/" + GetWeapon()->GetAttack().name);
-					aSprite->setTexture(t != nullptr ? *t : *Resources::GetTexture("attacks/default"));	//Set texture to attack specific or default if missing
-					sf::Vector2f offset = sf::Vector2f(aSprite->getGlobalBounds().width / 2, aSprite->getGlobalBounds().height / 2);
-					aSprite->setPosition(sprite.getPosition()+offset);
-					sf::Vector2f attackDir = target->sprite.getPosition()+offset - aSprite->getPosition();
-					for (unsigned int i = 0; i < 30; i++) {
-						aSprite->move(attackDir.x / 30, attackDir.y / 30);
-						sf::sleep(sf::milliseconds(16));
-					}
-					aSprite->setPosition(0, 0);
-				}
+				ProjectileAnimation(tile, target->tile, a.name,a.roll<a.successThreshold?-1:0);
+
 				Messages::Add(name + " rolls " + std::to_string(a.roll) + "/" + std::to_string(a.successThreshold) + " on " + a.name + " against " + target->nick);
 				if(a.roll>=a.successThreshold&&!a.fail)
 					target->GetAttacked(a);
 				else {
 					Resources::PlayWav("woosh");
-					if (a.fail)
-						Messages::Add("Critical failure");
+					if (a.fail) {
+						switch (Resources::Roll()%2+1) {		//Critical failures WIP
+						case 1:
+							ProjectileAnimation(target->tile, tile,a.name);
+							Messages::Add(nick+" accidentally attacked itself");
+							GetAttacked(a);
+							break;
+						case 2:
+							ProjectileAnimation(tile, tile, "stun");
+							Messages::Add(nick + " tripped");
+							GetAffected(Effect("Stun", 2, id));
+							break;
+						}
+					}
 				}
+				projectile.setPosition(0, 0);
 				UpdateBars();
 				return true;
 			}
@@ -471,14 +493,26 @@ bool Unit::UseItem(sf::Vector2i pos, int i)
 	return false;
 }
 
+int clamp(int val, int min, int max) {
+	return std::max(std::min(val, max), min);
+}
+
 void Unit::GetAffected(Effect e)
 {
 	Unit* u = GetUnit(e.owner);
-	Messages::Add((u!=nullptr ? u->nick : "Someone") + " used " + e.itemName + " on " + nick);
-	HP = std::min(maxHP, HP + e.hp);
-	MP = std::min(maxMP, MP + e.mp);
-	AP = std::min(maxAP, AP + e.ap);
+	if(e.itemName!=""&&e.duration==0)
+		Messages::Add((u!=nullptr ? u->nick : "Someone") + " used " + e.itemName + " on " + nick);
+	HP = clamp(HP + e.hp, 0, maxHP);
+	MP = clamp(MP + e.mp, 0, maxMP);
+	AP = clamp(AP + e.ap, 0, maxAP);
+	e.duration--;
 	UpdateBars();
+	ProjectileAnimation(tile, tile, e.name);
+	projectile.setPosition(0, 0);
+	if (e.duration > 0) {
+		buffs.push_back(e);
+		Messages::Add(nick + " received " + e.name + " for " + std::to_string(e.duration) + " turns");
+	}
 }
 
 void Unit::GetAttacked(Attack a)
@@ -505,6 +539,13 @@ void Unit::GetAttacked(Attack a)
 void Unit::EndOfTurn()
 {
 	AP = maxAP;
+	for (unsigned int i = 0; i < buffs.size(); i++) {	//Buff effects
+		GetAffected(buffs.at(i));
+		buffs.erase(buffs.begin() + i);
+		if (!buffs.size())
+			break;
+		i--;
+	}
 	UpdateBars();
 }
 

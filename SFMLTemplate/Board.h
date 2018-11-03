@@ -10,7 +10,7 @@ public:
 	~Board();
 	void InsertTile(unsigned short x, unsigned short y, Tile tile);
 	void Randomize();
-	bool CheckLOS(int x1, int y1, int x2, int y2, bool visual=false);
+	bool CheckLOS(int x1, int y1, int x2, int y2, bool visual=false, float offset = 0.01f);
 	std::vector<sf::Vector2i> FindPath(sf::Vector2i from, sf::Vector2i to);
 	void SetTileSize(float size);
 	float GetTileSize();

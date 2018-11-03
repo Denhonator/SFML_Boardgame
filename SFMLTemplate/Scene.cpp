@@ -4,8 +4,8 @@ Scene::Scene()
 {
 	srand(time(NULL));
 	board.Randomize();
-	for (int i = 0; i < board.boardSize.x; i++) {
-		for (int j = 0; j < board.boardSize.y; j++) {
+	for (unsigned int i = 0; i < board.boardSize.x; i++) {
+		for (unsigned int j = 0; j < board.boardSize.y; j++) {
 			if (i + j > 7 && board.GetTile(i, j).sprite == "grass"&&board.GetTile(i, j).unit == -1 && rand() % 101 > 95) {
 				int r = rand() % 101;
 				if(r<30)
@@ -23,9 +23,9 @@ Scene::Scene()
 	AddTile(&sf::Sprite(bg));
 	boardUi.push_back(sf::Sprite(*Resources::GetTexture("ui/outline")));
 	boardUi.at(0).setScale(Constants::tileSize / boardUi.at(0).getLocalBounds().width, Constants::tileSize / boardUi.at(0).getLocalBounds().height);
-	boardUi.push_back(*new sf::Sprite(*Resources::GetTexture("attacks/default")));
-	boardUi.at(1).setScale(Constants::tileSize / boardUi.at(0).getLocalBounds().width, Constants::tileSize / boardUi.at(0).getLocalBounds().height);
-	for (int i = 0; i < 10; i++) {
+	Unit::projectile = *new sf::Sprite(*Resources::GetTexture("attacks/default"));
+	Unit::projectile.setScale(Constants::tileSize / boardUi.at(0).getLocalBounds().width, Constants::tileSize / boardUi.at(0).getLocalBounds().height);
+	for (unsigned int i = 0; i < 10; i++) {
 		texts.push_back(sf::Text("", *Resources::GetFont("default.ttf")));
 		texts.at(i).setPosition(sf::Vector2f(i>4 ? 2100 : 0, i%5 * 200));
 	}
@@ -53,7 +53,7 @@ Scene::~Scene()
 void Scene::CheckAICombat()
 {
 	AIInCombat.clear();
-	for (int i = 0; i < units.size(); i++) {
+	for (unsigned int i = 0; i < units.size(); i++) {
 		if (!units.at(i).Dead() && units.at(i).player == 0) {
 			if(AIFindTarget(i)!=-1)
 				AIInCombat.push_back(i);
@@ -75,9 +75,9 @@ void Scene::AITurn()
 					int index = units.at(aiUnit).target;
 					std::vector<sf::Vector2i> path;
 					int shortest = -1;
-					if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) > range) {
+					if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) > range || !board.CheckLOS(units.at(aiUnit).tile.x, units.at(aiUnit).tile.y, units.at(index).tile.x, units.at(index).tile.y, false, 0.4f)) {
 						for (unsigned int i = 1; i < voffs.size(); i++) {	//Find fastest path to a tile in range of current attack
-							if (board.CheckLOS((units.at(index).tile + voffs.at(i)).x, (units.at(index).tile + voffs.at(i)).y, units.at(index).tile.x, units.at(index).tile.y)) {	//Only choose a tile with line of sight to target
+							if (board.CheckLOS((units.at(index).tile + voffs.at(i)).x, (units.at(index).tile + voffs.at(i)).y, units.at(index).tile.x, units.at(index).tile.y,false,0.4f)) {	//Only choose a tile with line of sight to target
 								path = board.FindPath(units.at(aiUnit).tile, units.at(index).tile + voffs.at(i));
 								if (path.size() && path.size() < dist && path.size() < 12) {
 									units.at(aiUnit).currentPath = path;
@@ -94,16 +94,16 @@ void Scene::AITurn()
 					}
 
 					if (units.at(aiUnit).currentPath.size()) {
-						for (int i = 0; i < 5; i++) {
+						for (unsigned int i = 0; i < 5; i++) {
 							if (units.at(aiUnit).MovePath())
 								sf::sleep(sf::milliseconds(300));
-							if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) == range) {
+							if (Unit::Distance(units.at(aiUnit).tile, units.at(index).tile) == range && board.CheckLOS(units.at(aiUnit).tile.x, units.at(aiUnit).tile.y, units.at(index).tile.x, units.at(index).tile.y, false, 0.4f)) {
 								break;
 							}
 						}
 					}
 
-					while (units.at(aiUnit).AttackTo(units.at(index).tile,false,&boardUi.at(1))) {
+					while (units.at(aiUnit).AttackTo(units.at(index).tile, &board)) {
 						sf::sleep(sf::milliseconds(300));
 						if (units.at(index).Dead()) {
 							index = AIFindTarget(aiUnit);
@@ -125,7 +125,7 @@ void Scene::AITurn()
 				break;
 			}
 		}
-		sf::sleep(sf::milliseconds(10));
+		sf::sleep(sf::milliseconds(16));
 	}
 }
 
@@ -133,7 +133,7 @@ int Scene::AIFindTarget(int unitIndex)
 {
 	int dist = 100;
 	int index = -1;
-	for (int i = 0; i < units.size(); i++) {
+	for (unsigned int i = 0; i < units.size(); i++) {
 		if (units.at(i).player == 0)
 			continue;
 		int newDist = Unit::Distance(units.at(unitIndex).tile, units.at(i).tile);
@@ -152,7 +152,7 @@ int Scene::AIFindTarget(int unitIndex)
 
 int Scene::NextFromList(int to, std::vector<int> list)
 {
-	for (int i = 0; i < list.size(); i++) {
+	for (unsigned int i = 0; i < list.size(); i++) {
 		if (to == list.at(i)) {
 			if (i == list.size() - 1)
 				return list.at(0);
@@ -175,29 +175,6 @@ void Scene::SetCombat(bool val)
 
 void Scene::Update()
 {
-	if (currentPlayer == 0 && players.size()>1) {
-		if (aiUnit == -2) {
-			aiUnit = -1;
-			EndTurn();
-		}
-		else if (aiUnit == -1) {
-			int prev = AIInCombat.size();
-			CheckAICombat();
-			if (AIInCombat.size()) {
-				SetCombat(true);
-				if (prev) {
-					aiUnit = 0;
-				}
-				else
-					currentPlayer = NextFromList(currentPlayer, players);
-			}
-			else {
-				SetCombat(false);
-				currentPlayer = NextFromList(currentPlayer, players);
-			}
-		}
-	}
-
 	if (board.refresh) {
 		for (unsigned int x = 0; x < board.boardSize.x; x++) {
 			for (unsigned int y = 0; y < board.boardSize.y; y++) {
@@ -223,6 +200,32 @@ void Scene::Update()
 		UpdateState();
 }
 
+void Scene::FixedUpdate()
+{
+	if (currentPlayer == 0 && players.size() > 1) {
+		if (aiUnit == -2) {
+			aiUnit = -1;
+			EndTurn();
+		}
+		else if (aiUnit == -1) {
+			int prev = AIInCombat.size();
+			CheckAICombat();
+			if (AIInCombat.size()) {
+				SetCombat(true);
+				if (prev) {
+					aiUnit = 0;
+				}
+				else
+					EndTurn();
+			}
+			else {
+				SetCombat(false);
+				EndTurn();
+			}
+		}
+	}
+}
+
 void Scene::AddTile(sf::Sprite * spr)
 {
 	tiles.push_back(*spr);
@@ -235,7 +238,7 @@ void Scene::AddUnit(Unit * unit)
 		playerUnits.push_back(unit->id);
 	}
 	bool found = false;
-	for (int i = 0; i < players.size(); i++) {
+	for (unsigned int i = 0; i < players.size(); i++) {
 		if (unit->player == players.at(i))
 			found = true;
 	}
@@ -283,7 +286,7 @@ void Scene::MouseHover(sf::Vector2i pos)
 Unit * Scene::FindUnit(int id)
 {
 	if (id != -1) {
-		for (int i = 0; i < units.size(); i++) {
+		for (unsigned int i = 0; i < units.size(); i++) {
 			if (units.at(i).id == id) {
 				return &units.at(i);
 			}
@@ -312,10 +315,11 @@ void Scene::SetAction(std::string action)
 
 void Scene::EndTurn()
 {
-	for (int i = 0; i < units.size(); i++) {
-		units.at(i).EndOfTurn();
-	}
 	currentPlayer = NextFromList(currentPlayer, players);
+	for (unsigned int i = 0; i < units.size(); i++) {
+		if(units.at(i).player==currentPlayer)
+			units.at(i).EndOfTurn();
+	}
 	Unit* u = FindUnit(currentUnit);
 	if (u == nullptr || (u->player != currentPlayer && currentPlayer != 0)) {
 		currentUnit = -1;
@@ -328,13 +332,13 @@ void Scene::UpdateState()
 {
 	update = false;
 	int index = -1;
-	for (int i = 0; i < players.size(); i++) {
+	for (unsigned int i = 0; i < players.size(); i++) {
 		if (players.at(i) == currentPlayer) {
 			index = i;
 		}
 	}
 	players.clear();
-	for (int i = 0; i < units.size(); i++) {
+	for (unsigned int i = 0; i < units.size(); i++) {
 		if (units.at(i).Dead()) {
 			if(!units.at(i).removed)
 				RemoveUnit(i);
@@ -351,7 +355,7 @@ void Scene::UpdateState()
 	texts.at(5).setString(t.Print());
 	Unit* u = Unit::GetUnit(t.unit);
 	texts.at(6).setString(u != nullptr ? u->Print() : "");
-	for (int i = 0; i < 9; i++) {
+	for (unsigned int i = 0; i < 9; i++) {
 		if (i == 4)
 			continue;
 		texts.at(i + 1).setPosition(texts.at(i+1).getPosition().x, texts.at(i).getGlobalBounds().top + texts.at(i).getGlobalBounds().height + 20);
@@ -431,7 +435,7 @@ void Scene::Click()
 			}
 		}
 		else if (currentAction == "attack") {
-			if (u->AttackTo(mouseTile,false,&boardUi.at(1)) && !combat)
+			if (u->AttackTo(mouseTile,&board) && !combat)
 				EndTurn();
 		}
 		else if (currentAction == "loot") {

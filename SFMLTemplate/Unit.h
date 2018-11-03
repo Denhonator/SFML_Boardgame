@@ -6,6 +6,7 @@
 #include "Messages.h"
 #include "Item.h"
 #include "Equipment.h"
+#include "Board.h"
 
 class Unit
 {
@@ -21,7 +22,7 @@ public:
 	bool MovePath();
 	bool LootFrom(sf::Vector2i pos);
 	bool LootFrom(Unit* unit);
-	bool AttackTo(sf::Vector2i pos, bool dry = false, sf::Sprite* aSprite = nullptr);
+	bool AttackTo(sf::Vector2i pos, Board* board, bool dry = false);
 	bool Push(sf::Vector2i pos);
 	bool UseItem(sf::Vector2i pos, int i = -1);
 	void GetAffected(Effect e);
@@ -56,6 +57,8 @@ public:
 	sf::VertexArray bars;
 	bool removed = false;
 
+	static sf::Sprite projectile;
+	static void ProjectileAnimation(sf::Vector2i from, sf::Vector2i to, std::string attackName = "default", int effect = 0);
 	static std::vector<Unit>* unit;
 private:
 	static int unitCount;
@@ -75,6 +78,7 @@ private:
 	std::vector<Weapon> weapons;
 	std::vector<Item> items;
 	std::vector<Equipment> equipment;
+	std::vector<Effect> buffs;
 	std::map<std::string, Equipment*> equipSlot;
 	std::map<std::string, int> attribute;
 	std::map<std::string, int> attributeGain;

@@ -57,11 +57,10 @@ void Board::Randomize()
 	}
 }
 
-bool Board::CheckLOS(int x1, int y1, int x2, int y2, bool visual)
+bool Board::CheckLOS(int x1, int y1, int x2, int y2, bool visual, float offset)
 {
-	float off = 0.01f;
-	std::vector<sf::Vector2f> testPoints = { sf::Vector2f(x1+off,y1+off), sf::Vector2f(x1+1-off,y1+off), sf::Vector2f(x1+off,y1+1-off), sf::Vector2f(x1+1-off,y1+1-off) };
-	std::vector<sf::Vector2f> destPoints = { sf::Vector2f(x2 + off,y2 + off), sf::Vector2f(x2 + 1 - off,y2 + off), sf::Vector2f(x2 + off,y2 + 1 - off), sf::Vector2f(x2 + 1 - off,y2 + 1 - off) };
+	std::vector<sf::Vector2f> testPoints = { sf::Vector2f(x1 + offset,y1 + offset), sf::Vector2f(x1 + 1 - offset,y1 + offset), sf::Vector2f(x1 + offset,y1 + 1 - offset), sf::Vector2f(x1 + 1 - offset,y1 + 1 - offset) };
+	std::vector<sf::Vector2f> destPoints = { sf::Vector2f(x2 + offset,y2 + offset), sf::Vector2f(x2 + 1 - offset,y2 + offset), sf::Vector2f(x2 + offset,y2 + 1 - offset), sf::Vector2f(x2 + 1 - offset,y2 + 1 - offset) };
 	sf::Vector2f dest;
 	sf::Vector2f ray;
 	sf::Vector2f dir;
@@ -187,7 +186,7 @@ void Board::SetTileSize(float size)
 
 float Board::GetTileSize()
 {
-	return rTex.getSize().x / boardSize.x;
+	return (float)rTex.getSize().x / (float)boardSize.x;
 }
 
 Tile Board::GetTile(unsigned short x, unsigned short y)

@@ -9,6 +9,7 @@ Effect::Effect(std::string name, int level, int owner, std::string itemName)
 	hp = 0;
 	mp = 0;
 	ap = 0;
+	duration = 0;
 	this->itemName = itemName;
 
 	std::vector<std::string> info = Resources::GetText("effects/" + name);
@@ -23,6 +24,9 @@ Effect::Effect(std::string name, int level, int owner, std::string itemName)
 		}
 		else if (temp.first == "ap") {
 			ap = std::stoi(temp.second.at(0)) + std::stoi(temp.second.at(1))*(level - 1);
+		}
+		else if (temp.first == "duration") {
+			duration = std::stoi(temp.second.at(0)) + std::stoi(temp.second.at(1))*(level - 1);
 		}
 	}
 }
