@@ -2,7 +2,7 @@
 
 int Unit::unitCount = 0;
 std::vector<Unit>* Unit::unit;
-sf::Sprite Unit::projectile;
+std::vector<Projectile> Unit::projectile;
 
 Unit::Unit(std::string name, int player, sf::Vector2i pos, std::string nick)
 {
@@ -13,9 +13,9 @@ Unit::Unit(std::string name, int player, sf::Vector2i pos, std::string nick)
 	this->name = name;
 	if (nick == "")
 		nick = name;
-	this->nick = nick;
 	XP = 0;
 	id = unitCount;
+	this->nick = nick + std::to_string(id);;
 	LoadFromFile("units/" + name + "/" + nick);
 	if(weapons.size()==0)
 		AddWeapon("self", 1);
@@ -370,30 +370,14 @@ bool Unit::LootFrom(Unit * unit)
 	}
 }
 
-void Unit::ProjectileAnimation(sf::Vector2i from, sf::Vector2i to, std::string attackName, int effect)
-{
-	Unit * f = GetUnit(Tile::tileRef[from.x][from.y].unit);
-	sf::Texture * tex = Resources::GetTexture("attacks/" + attackName);
-	projectile.setTexture(tex != nullptr ? *tex : *Resources::GetTexture("attacks/default"));	//Set texture to attack-specific or default if missing
-	sf::Vector2f offset = sf::Vector2f(projectile.getGlobalBounds().width / 2, projectile.getGlobalBounds().height / 2);
-	if(projectile.getPosition()==sf::Vector2f(0,0))
-		projectile.setPosition(f->sprite.getPosition() + offset);
-	sf::Vector2f attackDir = sf::Vector2f(to.x*Constants::tileSize,to.y*Constants::tileSize) + offset - projectile.getPosition();
-	if (effect == -1) {	//miss effect
-		attackDir += sf::Vector2f((Resources::Roll() % 3 - 1) * 2 * offset.x, (Resources::Roll() % 5 - 2) * offset.y);
-	}
-	for (unsigned int i = 0; i < 30; i++) {
-		projectile.move(attackDir.x / 30, attackDir.y / 30);
-		sf::sleep(sf::milliseconds(16));
-	}
-}
-
 bool Unit::AttackTo(sf::Vector2i pos, Board* board, bool dry)
 {
 	if (weapons.at(currentWeapon).CanUse(attribute)) {
 		Attack a = weapons.at(currentWeapon).GetAttack();
 		a.fail = a.roll <= 5 + criticalFail;
 		a.crit = a.roll >= 95 + criticalHit;
+		if (dry)
+			a.ap = 0;
 		if (AP >= a.ap && Distance(tile, pos) <= a.range && board->CheckLOS(tile.x,tile.y,pos.x,pos.y,false,0.4f)) {
 			Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
 			if (target != nullptr) {
@@ -416,29 +400,50 @@ bool Unit::AttackTo(sf::Vector2i pos, Board* board, bool dry)
 
 				a.roll += tohit;
 				AP -= a.ap;
-				ProjectileAnimation(tile, target->tile, a.name,a.roll<a.successThreshold?-1:0);
 
 				Messages::Add(name + " rolls " + std::to_string(a.roll) + "/" + std::to_string(a.successThreshold) + " on " + a.name + " against " + target->nick);
-				if(a.roll>=a.successThreshold&&!a.fail)
+				if (a.roll >= a.successThreshold && !a.fail) {
+					projectile.push_back(*new Projectile(tile, target->tile, a.name, 0));
+					sf::sleep(sf::milliseconds(500));
 					target->GetAttacked(a);
+				}
 				else {
-					Resources::PlayWav("woosh");
 					if (a.fail) {
-						switch (Resources::Roll()%2+1) {		//Critical failures WIP
+						switch (Resources::Roll()%3+1) {		//Critical failures WIP
 						case 1:
-							ProjectileAnimation(target->tile, tile,a.name);
+							projectile.push_back(*new Projectile(tile, target->tile,a.name,1));	//Attack self
+							sf::sleep(sf::milliseconds(1000));
 							Messages::Add(nick+" accidentally attacked itself");
 							GetAttacked(a);
 							break;
 						case 2:
-							ProjectileAnimation(tile, tile, "stun");
+							projectile.push_back(*new Projectile(tile, tile, "stun"));	//Trip
+							sf::sleep(sf::milliseconds(500));
 							Messages::Add(nick + " tripped");
 							GetAffected(Effect("Stun", 2, id));
 							break;
+						case 3:
+							std::vector<int> viableTargets;								//Attack random target instead
+							for (unsigned int i = 0; i < unit->size(); i++) {
+								if (unit->at(i).id!=id && AttackTo(unit->at(i).tile, board, true)) {
+									viableTargets.push_back(i);
+								}
+							}
+							int x = Resources::Roll() % viableTargets.size();
+							x = viableTargets.at(x);
+							projectile.push_back(*new Projectile(tile, unit->at(x).tile, a.name));
+							sf::sleep(sf::milliseconds(500));
+							Messages::Add(nick + " accidentally attacked " + unit->at(x).nick + " instead");
+							unit->at(x).GetAttacked(a);
+							break;
 						}
 					}
+					else {
+						projectile.push_back(*new Projectile(tile, target->tile, a.name, -1));
+						sf::sleep(sf::milliseconds(500));
+						Resources::PlayWav("woosh");
+					}
 				}
-				projectile.setPosition(0, 0);
 				UpdateBars();
 				return true;
 			}
@@ -507,8 +512,8 @@ void Unit::GetAffected(Effect e)
 	AP = clamp(AP + e.ap, 0, maxAP);
 	e.duration--;
 	UpdateBars();
-	ProjectileAnimation(tile, tile, e.name);
-	projectile.setPosition(0, 0);
+	projectile.push_back(*new Projectile(tile, tile, e.name));
+	sf::sleep(sf::milliseconds(500));
 	if (e.duration > 0) {
 		buffs.push_back(e);
 		Messages::Add(nick + " received " + e.name + " for " + std::to_string(e.duration) + " turns");

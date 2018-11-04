@@ -153,6 +153,7 @@
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="MenuElement.cpp" />
     <ClCompile Include="Messages.cpp" />
+    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="Resources.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="Menu.h" />
     <ClInclude Include="MenuElement.h" />
     <ClInclude Include="Messages.h" />
+    <ClInclude Include="Projectile.h" />
     <ClInclude Include="Resources.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Tile.h" />

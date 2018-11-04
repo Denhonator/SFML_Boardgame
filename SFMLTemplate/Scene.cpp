@@ -23,8 +23,6 @@ Scene::Scene()
 	AddTile(&sf::Sprite(bg));
 	boardUi.push_back(sf::Sprite(*Resources::GetTexture("ui/outline")));
 	boardUi.at(0).setScale(Constants::tileSize / boardUi.at(0).getLocalBounds().width, Constants::tileSize / boardUi.at(0).getLocalBounds().height);
-	Unit::projectile = *new sf::Sprite(*Resources::GetTexture("attacks/default"));
-	Unit::projectile.setScale(Constants::tileSize / boardUi.at(0).getLocalBounds().width, Constants::tileSize / boardUi.at(0).getLocalBounds().height);
 	for (unsigned int i = 0; i < 10; i++) {
 		texts.push_back(sf::Text("", *Resources::GetFont("default.ttf")));
 		texts.at(i).setPosition(sf::Vector2f(i>4 ? 2100 : 0, i%5 * 200));
@@ -274,10 +272,11 @@ void Scene::MouseHover(sf::Vector2i pos)
 		Unit* u = Unit::GetUnit(board.GetTile(mouseTile.x,mouseTile.y).unit);
 		texts.at(6).setString(u != nullptr ? u->Print() : "");
 		if (currentUnit >= 0) {
-			std::vector<sf::Vector2i> path = board.FindPath(FindUnit(currentUnit)->tile, mouseTile);
+			u = FindUnit(currentUnit);
+			u->currentPath = board.FindPath(FindUnit(currentUnit)->tile, mouseTile);
 			boardUiV.clear();
-			for (unsigned int i = 0; i < path.size(); i++) {
-				boardUiV.append(sf::Vertex(sf::Vector2f(path.at(i).x*Constants::tileSize+Constants::tileSize/2, path.at(i).y*Constants::tileSize+Constants::tileSize/2), sf::Color(255, 50, 50, 255)));
+			for (unsigned int i = 0; i < u->currentPath.size(); i++) {
+				boardUiV.append(sf::Vertex(sf::Vector2f(u->currentPath.at(i).x*Constants::tileSize+Constants::tileSize/2, u->currentPath.at(i).y*Constants::tileSize+Constants::tileSize/2), sf::Color(255, 50, 50, 255)));
 			}
 		}
 	}
@@ -428,10 +427,14 @@ void Scene::Click()
 	
 	if (currentUnit != -1 && !Messages::prompting && validUnit) {
 		if (currentAction == "move") {
-			if (u->MoveTo(mouseTile)) {
-				if(!combat)
-					EndTurn();
+			bool wasCombat = combat;
+			while (u->MovePath()||u->MoveTo(mouseTile)) {
 				board.refresh = true;
+				if (combat&&!wasCombat)
+					break;
+				else if(!combat)
+					EndTurn();
+				sf::sleep(sf::milliseconds(100));
 			}
 		}
 		else if (currentAction == "attack") {

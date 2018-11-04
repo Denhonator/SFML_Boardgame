@@ -7,6 +7,7 @@
 #include "Item.h"
 #include "Equipment.h"
 #include "Board.h"
+#include "Projectile.h"
 
 class Unit
 {
@@ -57,8 +58,7 @@ public:
 	sf::VertexArray bars;
 	bool removed = false;
 
-	static sf::Sprite projectile;
-	static void ProjectileAnimation(sf::Vector2i from, sf::Vector2i to, std::string attackName = "default", int effect = 0);
+	static std::vector<Projectile> projectile;
 	static std::vector<Unit>* unit;
 private:
 	static int unitCount;
