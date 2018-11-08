@@ -1,1 +1,1 @@
-spit=50,100,3,-1,0
+attacks=Spit

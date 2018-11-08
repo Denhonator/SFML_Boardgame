@@ -1,0 +1,5 @@
+HitChance=50
+Range=3
+AP=-1
+MP=0
+Poison=100

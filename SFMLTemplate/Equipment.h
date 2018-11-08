@@ -11,12 +11,14 @@ public:
 	std::string GetType() {	return type; };
 	bool inUse;
 	int currentSlot;
-	Damage armor;
+	int GetResistance(std::string type);
+	std::map<std::string, int>* GetResistances() { return &resistance; };
 private:
 	std::string name, type;
 	int owner;
 	int level;
 	int baseDefense;
 	std::map<std::string, int> requirment;
+	std::map<std::string, int> resistance;
 };
 

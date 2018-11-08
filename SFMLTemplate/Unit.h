@@ -19,12 +19,11 @@ public:
 	static bool TransferWeapon(Unit* from, Unit* to, int index);
 	void LoadFromFile(std::string path);
 	bool MoveTo(sf::Vector2i pos, int ap = 3);
-	bool MoveTowards(sf::Vector2i pos);
+//	bool MoveTowards(sf::Vector2i pos);
 	bool MovePath();
 	bool LootFrom(sf::Vector2i pos);
 	bool LootFrom(Unit* unit);
 	bool AttackTo(sf::Vector2i pos, Board* board, bool dry = false);
-	bool Push(sf::Vector2i pos);
 	bool UseItem(sf::Vector2i pos, int i = -1);
 	void GetAffected(Effect e);
 	void GetAttacked(Attack a);
@@ -65,9 +64,7 @@ private:
 
 	bool Unequip(int i, int slot = 0, bool quiet = false);
 	Unit* ChooseBodyFrom(sf::Vector2i pos);
-	int pushedBy = -1;
 	std::string name, nick;
-	Damage armor;
 	int maxAP, AP;
 	int maxHP, HP;
 	int maxMP, MP;
@@ -82,4 +79,5 @@ private:
 	std::map<std::string, Equipment*> equipSlot;
 	std::map<std::string, int> attribute;
 	std::map<std::string, int> attributeGain;
+	std::map<std::string, int> resistance;
 };

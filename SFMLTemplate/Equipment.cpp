@@ -20,13 +20,11 @@ Equipment::Equipment(std::string name, int level, int owner)
 			else if (temp.first == "type") {
 				type = temp.second.at(0);
 			}
-			else if (temp.first=="baseDefense") {
-				baseDefense = std::stoi(temp.second.at(0)) + (std::stoi(temp.second.at(1)) * (level - 1))/100;
+			else {
+				resistance[temp.first] = std::stoi(temp.second.at(0)) + (std::stoi(temp.second.at(1)) * (level - 1))/100;
 			}
 		}
 	}
-
-	armor = { baseDefense,0,0,0 };
 }
 
 Equipment::~Equipment()
@@ -51,4 +49,12 @@ bool Equipment::CanUse(std::map<std::string, int> attributes)
 		}
 	}
 	return true;
+}
+
+int Equipment::GetResistance(std::string type)
+{
+	if (resistance.count(type)) {
+		return resistance[type];
+	}
+	return 0;
 }

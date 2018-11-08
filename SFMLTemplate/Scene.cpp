@@ -181,7 +181,7 @@ void Scene::Update()
 		}
 		for (unsigned int i = 0; i < playerUnits.size(); i++) {
 			Unit* u = FindUnit(playerUnits.at(i));
-			if (u != nullptr) {
+			if (u != nullptr && !u->Dead()) {
 				for (unsigned int x = 0; x < board.boardSize.x; x++) {
 					for (unsigned int y = 0; y < board.boardSize.y; y++) {
 						int dist = std::abs((int)x - u->tile.x) + std::abs((int)y - u->tile.y);

@@ -9,20 +9,16 @@ Weapon::Weapon(std::string name, int level, int owner)
 	currentAttack = 0;
 	inUse = false;
 	std::vector<std::string> info = Resources::GetText("weapons/" + name);
-	std::string buffer = "";
 	for (int i = 0; i < info.size(); i++) {
 		std::pair<std::string, std::vector<std::string>> temp = Resources::KeyWithStrings(info.at(i));
 		if (temp.first != "") {
 			if (Resources::StrInVector(temp.first, Constants::attributes)) {
 				requirment[temp.first] = std::stoi(temp.second.at(0)) + std::stoi(temp.second.at(1))*(level - 1);
 			}
-			else {
-				int hitchance = std::stoi(temp.second.at(0));
-				int damage = (baseDamage * std::stoi(temp.second.at(1))) / 100;
-				int range = std::stoi(temp.second.at(2));
-				int ap = std::stoi(temp.second.at(3));
-				int mp = std::stoi(temp.second.at(4));
-				attacks.push_back(Attack(owner, temp.first, hitchance, Damage{ damage,0,0,0 }, range, ap>=0?ap:5, mp)); //Default AP cost 5
+			if(temp.first=="attacks") {
+				for (int j = 0; j < temp.second.size(); j++) {
+					attacks.push_back(Attack(temp.second.at(j), baseDamage, owner));
+				}
 			}
 		}
 	}
@@ -41,20 +37,14 @@ std::string Weapon::Print(bool full, bool justName)
 		for (int i = 0; i < attacks.size(); i++) {
 			buffer += "\n" + attacks.at(i).name + " " +
 				std::to_string(100 - attacks.at(i).successThreshold) + "% " +
-				std::to_string(attacks.at(i).damage.physical) + "," +
-				std::to_string(attacks.at(i).damage.fire) + "," +
-				std::to_string(attacks.at(i).damage.ice) + "," +
-				std::to_string(attacks.at(i).damage.lightning);
+				std::to_string(attacks.at(i).baseDmg);
 		}
 		return buffer;
 	}
 	return buffer + "\n" +
 		attacks.at(currentAttack).name + " " +
 		std::to_string(100-attacks.at(currentAttack).successThreshold)+"% " +
-		std::to_string(attacks.at(currentAttack).damage.physical) + "," +
-		std::to_string(attacks.at(currentAttack).damage.fire) + "," +
-		std::to_string(attacks.at(currentAttack).damage.ice) + "," +
-		std::to_string(attacks.at(currentAttack).damage.lightning);
+		std::to_string(attacks.at(currentAttack).baseDmg);
 }
 
 void Weapon::SwitchAttack(int i)

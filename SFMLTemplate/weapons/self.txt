@@ -1,2 +1,1 @@
-punch=40,100,1,-1,0
-kick=25,150,1,-1,0
+attacks=Punch,Kick

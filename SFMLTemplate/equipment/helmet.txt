@@ -1,3 +1,4 @@
 strength=1,1
 type=head
-baseDefense=3,100
+Impact=1,70
+Piercing=3,100

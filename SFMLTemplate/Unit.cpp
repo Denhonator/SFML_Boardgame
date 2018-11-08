@@ -211,13 +211,15 @@ void Unit::UpdateBonuses()
 	luckBonus = -8 + attribute["luck"];
 	charBonus = -10 + attribute["charisma"] * 4;
 
-	armor = { 0,0,0,0 };
+	resistance = std::map<std::string, int>();
 	for (int i = 0; i < equipment.size(); i++) {	//Equipment effects
 		if (equipment.at(i).inUse) {
-			armor.physical += equipment.at(i).armor.physical;
-			armor.fire += equipment.at(i).armor.fire;
-			armor.ice += equipment.at(i).armor.ice;
-			armor.lightning += equipment.at(i).armor.lightning;
+			for (const auto &pair : *equipment.at(i).GetResistances()) {
+				if (!resistance.count(pair.first)) {
+					resistance[pair.first] = 0;
+				}
+				resistance[pair.first] += pair.second;
+			}
 		}
 	}
 }
@@ -269,28 +271,28 @@ bool Unit::MoveTo(sf::Vector2i pos, int ap)
 	return false;
 }
 
-bool Unit::MoveTowards(sf::Vector2i pos)
-{
-	sf::Vector2i dif = sf::Vector2i(pos.x-tile.x, pos.y-tile.y);
-	if (dif.x > 0)
-		dif.x = 1;
-	if (dif.x < 0)
-		dif.x = -1;
-	if (dif.y > 0)
-		dif.y = 1;
-	if (dif.y < 0)
-		dif.y = -1;
-	std::vector<sf::Vector2i> voffs = Resources::Voffs();
-	for (int i = 0; i < voffs.size();i++) {
-		if (MoveTo(tile + dif + voffs.at(i)))
-			return true;
-	}
-	for (int i = 0; i < voffs.size(); i++) {
-		if (Push(tile + dif + voffs.at(i)))
-			return true;
-	}
-	return false;
-}
+//bool Unit::MoveTowards(sf::Vector2i pos)
+//{
+//	sf::Vector2i dif = sf::Vector2i(pos.x-tile.x, pos.y-tile.y);
+//	if (dif.x > 0)
+//		dif.x = 1;
+//	if (dif.x < 0)
+//		dif.x = -1;
+//	if (dif.y > 0)
+//		dif.y = 1;
+//	if (dif.y < 0)
+//		dif.y = -1;
+//	std::vector<sf::Vector2i> voffs = Resources::Voffs();
+//	for (int i = 0; i < voffs.size();i++) {
+//		if (MoveTo(tile + dif + voffs.at(i)))
+//			return true;
+//	}
+//	for (int i = 0; i < voffs.size(); i++) {
+//		if (Push(tile + dif + voffs.at(i)))
+//			return true;
+//	}
+//	return false;
+//}
 
 bool Unit::MovePath()
 {
@@ -458,25 +460,6 @@ bool Unit::AttackTo(sf::Vector2i pos, Board* board, bool dry)
 	return false;
 }
 
-bool Unit::Push(sf::Vector2i pos)
-{
-	if (pos == tile || pos.x<0 || pos.y<0 ||pos.x>Constants::boardSize||pos.y>Constants::boardSize)
-		return false;
-	Attack a = Attack(id, "push", 95, Damage{ 0,0,0,0 }, 1, 4, 0);
-	a.Roll();
-	a.knockback = pos - tile;
-	if (AP >= a.ap) {
-		Unit* target = GetUnit(Tile::tileRef[pos.x][pos.y].unit);
-		if (target != nullptr && target->player==player && target->id!=pushedBy) {
-			AP -= a.ap;
-			if(a.roll>=a.successThreshold)
-				target->GetAttacked(a);
-			return true;
-		}
-	}
-	return false;
-}
-
 bool Unit::UseItem(sf::Vector2i pos, int i)
 {
 	if (i < 0) {
@@ -524,19 +507,20 @@ void Unit::GetAttacked(Attack a)
 {
 	int mult = a.crit ? 2 : 1;
 	int temp = HP;
-	HP -= a.damage.physical * mult;
-	HP -= a.damage.fire * mult;
-	HP -= a.damage.ice * mult;
-	HP -= a.damage.lightning * mult;
+	for (const auto &pair : a.damage) {
+		if (resistance.count(pair.first)) {
+			a.damage[pair.first]-=pair.second/5;	//Reduce damage by one per 5 resistance of the type
+		}
+		HP -= a.damage[pair.first];
+	}
 	if (a.knockback.x || a.knockback.y) {
 		MoveTo(tile + a.knockback, 0);
-		pushedBy = a.attacker;
 	}
 	if (HP < temp) {
 		Resources::PlayWav("hit");
 		if (a.crit)
 			Messages::Add("Critical hit!");
-		Messages::Add(name + " takes " + std::to_string(a.damage.physical) + " damage");
+		Messages::Add(name + " takes " + std::to_string(temp-HP) + " damage");
 	}
 	UpdateBars();
 }
@@ -567,11 +551,10 @@ std::string Unit::Print(bool full, bool justName)
 		buffer += "\n" + weapons.at(currentWeapon).Print();
 		if(items.size())
 			buffer += "\nItem: " + items.at(currentItem).Print();
-		buffer += "\nArmor: " + std::to_string(armor.physical) + "," +
-			std::to_string(armor.fire) + "," +
-			std::to_string(armor.ice) + "," +
-			std::to_string(armor.lightning) +
-			"\nTo hit bonus: " + std::to_string(tohit) +
+		for (const auto &pair : resistance) {
+			buffer += "\n" + pair.first + ": " + std::to_string(pair.second);
+		}
+		buffer +="\nTo hit bonus: " + std::to_string(tohit) +
 			"\nCrit chance: " + std::to_string(100 - (95 + criticalHit)) + "%" +
 			"\nFail chance: " + std::to_string(5 + criticalFail) + "%";
 	}
