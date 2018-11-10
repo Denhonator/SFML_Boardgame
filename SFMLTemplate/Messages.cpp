@@ -8,6 +8,7 @@ float Messages::fade = 0;
 bool Messages::prompting = false;
 char Messages::c = 0;
 sf::Vector2f Messages::promptClick;
+int Messages::messageIndex;
 
 Messages::Messages()
 {
@@ -25,18 +26,8 @@ Messages::~Messages()
 void Messages::Add(std::string s)
 {
 	texts.push_back(s);
-	if (texts.size() > 5) {
-		texts.erase(texts.begin());
-		texts.shrink_to_fit();
-	}
-	std::string buffer = "";
-	for (unsigned int i = 0; i < texts.size(); i++) {
-		buffer += texts.at(i);
-		if (i < texts.size() - 1)
-			buffer += "\n";
-	}
-	log.setString(buffer);
-	log.setPosition(Constants::fixedView.left + Constants::fixedView.width / 3, Constants::fixedView.top + Constants::fixedView.height*0.82f);
+	messageIndex = texts.size() - 5;
+	UpdateText();
 }
 
 void Messages::UpdatePos()
@@ -94,4 +85,28 @@ void Messages::SetInput(char c)
 void Messages::Click(sf::Vector2f pos)
 {
 	promptClick = pos;
+}
+
+void Messages::ScrollMessages(int off)
+{
+	messageIndex = std::max(std::min((int)texts.size() - 5, messageIndex + off), 0);
+	UpdateText();
+}
+
+bool Messages::OnLog(sf::Vector2f mouse)
+{
+	return log.getGlobalBounds().contains(mouse.x,mouse.y);
+}
+
+void Messages::UpdateText()
+{
+	std::string buffer = "";
+	messageIndex = std::max(std::min((int)texts.size() - 5, messageIndex), 0);
+	for (unsigned int i = messageIndex; i < texts.size() && i < messageIndex+5; i++) {
+		buffer += texts.at(i);
+		if (i < texts.size() - 1)
+			buffer += "\n";
+	}
+	log.setString(buffer);
+	log.setPosition(Constants::fixedView.left + Constants::fixedView.width / 3, Constants::fixedView.top + Constants::fixedView.height*0.82f);
 }

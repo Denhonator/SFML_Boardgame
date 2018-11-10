@@ -13,12 +13,16 @@ public:
 	static char WaitInput();
 	static void SetInput(char c);
 	static void Click(sf::Vector2f pos);
+	static void ScrollMessages(int off);
+	static bool OnLog(sf::Vector2f mouse);
 	static bool prompting;
 	static sf::Text log;
 	static sf::Text notice;
 	static sf::Text prompt;
 private:
+	static void UpdateText();
 	static char c;
+	static int messageIndex;
 	static sf::Vector2f promptClick;
 	static std::vector<std::string> texts;
 	static float fade;

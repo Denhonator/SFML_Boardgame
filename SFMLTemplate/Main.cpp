@@ -99,8 +99,13 @@ void Main::Events()
 		}
 
 		if (event.type == sf::Event::MouseWheelScrolled) {
-			view.zoom(1-event.mouseWheelScroll.delta/30);
-			window.setView(view);
+			if (Messages::OnLog(window.mapPixelToCoords(mousePos, fixedView))) {
+				Messages::ScrollMessages(-event.mouseWheelScroll.delta / std::abs(event.mouseWheelScroll.delta));
+			}
+			else {
+				view.zoom(1 - event.mouseWheelScroll.delta / 30);
+				window.setView(view);
+			}
 		}
 
 		if (event.type == sf::Event::MouseMoved) {

@@ -529,6 +529,8 @@ void Unit::EndOfTurn()
 {
 	AP = maxAP;
 	for (unsigned int i = 0; i < buffs.size(); i++) {	//Buff effects
+		if (!buffs.size())
+			break;
 		GetAffected(buffs.at(i));
 		buffs.erase(buffs.begin() + i);
 		if (!buffs.size())

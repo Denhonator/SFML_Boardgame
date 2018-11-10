@@ -1,0 +1,5 @@
+HitChance=30
+Range=1
+AP=-1
+MP=0
+Piercing=160

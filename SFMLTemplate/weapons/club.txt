@@ -1,0 +1,2 @@
+strength=8,1
+attacks=Club Swing,Club Overhead

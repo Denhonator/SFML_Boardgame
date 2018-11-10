@@ -11,7 +11,7 @@ Attack::Attack(std::string name, int baseDmg, int attacker)
 
 	std::vector<std::string> info = Resources::GetText("attacks/" + name);
 
-	for (int i = 0; i < info.size(); i++) {
+	for (unsigned int i = 0; i < info.size(); i++) {
 		std::pair<std::string, std::vector<std::string>> temp = Resources::KeyWithStrings(info.at(i));
 		if (temp.first != "") {
 			if (temp.first == "HitChance") {
@@ -27,6 +27,11 @@ Attack::Attack(std::string name, int baseDmg, int attacker)
 			}
 			else if (temp.first == "MP") {
 				mp = std::stoi(temp.second.at(0));
+			}
+			else if (temp.first == "Effects") {
+				for (unsigned int j = 0; j < temp.second.size(); j++) {
+					effects.push_back(* new Effect(temp.second.at(j), baseDmg - 1, attacker, name));
+				}
 			}
 			else {
 				damage[temp.first] = (baseDmg * std::stoi(temp.second.at(0))) / 100;
